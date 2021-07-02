@@ -539,41 +539,64 @@ for filenames in Matches:
         print("p.assessment_interruption.name: ", p.assessment_interruption.name)
         mathData=MathData()
         totalTime = mathData.totalTime
+        correctResponseCount = 0
         for correctResponses in p.assessment_interruption.interruption.math_tasks:
-            # print(correctResponses.correct)
+            if correctResponses.correct == True:
+                correctResponseCount += 1
+                # print("correct checks: ", correctResponses.correct)
             totalTime += float(correctResponses.timeSpent)
             # print(totalTime)
+            # correctResponseCount+=1
+        print("count of correct responses: ", correctResponseCount)
         totalNumberOfmathTasks = len(p.assessment_interruption.interruption.math_tasks)
         print("totalNumberOfmathTasks: ", totalNumberOfmathTasks)
         # print("getting attribute: ", getattr(mathData, 'average_time'))
         mathData.average_time = totalTime/totalNumberOfmathTasks
         averageTimeMathInterruptions = mathData.average_time
-        print("Time during correct responses to interruptions during Assessment phase", averageTimeMathInterruptions,"\n")
+        percentCorrect = correctResponseCount/totalNumberOfmathTasks
+        print("Time during correct responses to math interruptions during Assessment phase: ", averageTimeMathInterruptions,"seconds")
+        print("Percentage correct responses to interruptions math during Assessment phase: ", percentCorrect*100,"%","\n")
 
 
     # Average time for correct responses to math interruptions during TRAINING phase
     print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
-    # if p.training_interruption.name == "math":
-    #     print("p.training_interruption.name: ", p.training_interruption.name)
+    if p.training_interruption.name == "math":
+        print("p.training_interruption.name: ", p.training_interruption.name)
+        # correctResponseCount = 0
         # for correctResponses in p.training_interruption.interruption.math_tasks:
+        #     if correctResponses.correct == True:
+        #         correctResponseCount += 1
         #     totalTime += float(correctResponses.timeSpent)
+        # print("count of correct responses: ", correctResponseCount)
         # totalNumberOfmathTasks = len(p.training_interruption.interruption.math_tasks)
         # print("totalNumberOfmathTasks: ", totalNumberOfmathTasks)
         # mathData.average_time = totalTime/totalNumberOfmathTasks
         # averageTimeMathInterruptions = mathData.average_time
-        # print("Time during correct responses to interruptions during Assessment phase", averageTimeMathInterruptions,"\n")
+        # percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        # print("Time during correct responses to math interruptions during Training phase: ",
+        #       averageTimeMathInterruptions, "seconds")
+        # print("Percentage correct responses to interruptions math during Training phase: ", percentCorrect * 100,"%",
+        #       "\n")
 
 
     # Average time for correct responses to math interruptions during TESTING phase
     if p.testing_interruption.name == "math":
         print("p.testing_interruption.name: ", p.testing_interruption.name)
+        correctResponseCount = 0
         for correctResponses in p.testing_interruption.interruption.math_tasks:
+            if correctResponses.correct == True:
+                correctResponseCount += 1
             totalTime += float(correctResponses.timeSpent)
+        print("count of correct responses: ", correctResponseCount)
         totalNumberOfmathTasks = len(p.testing_interruption.interruption.math_tasks)
         print("totalNumberOfmathTasks: ", totalNumberOfmathTasks)
         mathData.average_time = totalTime/totalNumberOfmathTasks
         averageTimeMathInterruptions = mathData.average_time
-        print("Time during correct responses to interruptions during Assessment phase", averageTimeMathInterruptions,"\n")
+        percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        print("Time during correct responses to math interruptions during Testing phase: ",
+              averageTimeMathInterruptions, "seconds")
+        print("Percentage correct responses to interruptions math during Testing phase: ", percentCorrect * 100, "%",
+              "\n")
 
 
     # Participant's average time for correct responses to stroop interruptions
@@ -581,31 +604,47 @@ for filenames in Matches:
         print("p.assessment_interruption.name: ", p.assessment_interruption.name)
         stroopData=StroopData()
         totalTime = stroopData.totalTime
+        correctResponseCount = 0
         for correctResponses in p.assessment_interruption.interruption.stroop_tasks:
+            if correctResponses.correct == True:
+                correctResponseCount += 1
             # print(correctResponses.correct)
             totalTime += float(correctResponses.timeSpent)
             # print(totalTime)
+        print("count of correct responses: ", correctResponseCount)
         totalNumberOfStroopTasks = len(p.assessment_interruption.interruption.stroop_tasks)
         print("totalNumberOfmathTasks: ", totalNumberOfStroopTasks)
         # print("getting attribute: ", getattr(mathData, 'average_time'))
         stroopData.average_time = totalTime/totalNumberOfStroopTasks
         averageTimeStroopInterruptions = stroopData.average_time
-        print("Time during correct responses to interruptions during Assessment phase", averageTimeStroopInterruptions,"\n")
+        percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        print("Time during correct responses to stroop interruptions during Assessment phase: ",
+              averageTimeMathInterruptions, "seconds")
+        print("Percentage correct responses to interruptions stroop during Assessment phase: ", percentCorrect * 100, "%",
+              "\n")
 
     # Participant's average time for correct responses to stroop interruptions in Training phase
     print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
     # ********Bug...Draw task is labelled as Hanoi task
-    # if p.training_interruption.name == "stroop":
-    # print("p.training_interruption.name: ", p.training_interruption.name)
-        # stroopData = StroopData()
-        # totalTime = stroopData.totalTime
+    if p.training_interruption.name == "stroop":
+        print("p.training_interruption.name: ", p.training_interruption.name)
+        stroopData = StroopData()
+        totalTime = stroopData.totalTime
+        # correctResponseCount = 0
         # for correctResponses in p.training_interruption.interruption.stroop_tasks:
+        #     if correctResponses.correct == True:
+        #         correctResponseCount += 1
         #     totalTime += float(correctResponses.timeSpent)
+        # print("count of correct responses: ", correctResponseCount)
         # totalNumberOfStroopTasks = len(p.training_interruption.interruption.stroop_tasks)
         # print("totalNumberOfmathTasks: ", totalNumberOfStroopTasks)
         # stroopData.average_time = totalTime/totalNumberOfStroopTasks
         # averageTimeStroopInterruptions = stroopData.average_time
-        # print("Time during correct responses to interruptions during Assessment phase", averageTimeStroopInterruptions,"\n")
+        # percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        # print("Time during correct responses to stroop interruptions during Training phase: ",
+        #       averageTimeMathInterruptions, "seconds")
+        # print("Percentage correct responses to interruptions stroop during Training phase: ", percentCorrect * 100, "%",
+        #       "\n")
 
 
     # Average time for correct responses to stroop interruptions during TESTING phase
@@ -613,13 +652,21 @@ for filenames in Matches:
         print("p.testing_interruption.name: ", p.testing_interruption.name)
         stroopData = StroopData()
         totalTime = stroopData.totalTime
+        correctResponseCount = 0
         for correctResponses in p.testing_interruption.interruption.stroop_tasks:
+            if correctResponses.correct == True:
+                correctResponseCount += 1
             totalTime += float(correctResponses.timeSpent)
+        print("count of correct responses: ", correctResponseCount)
         totalNumberOfStroopTasks = len(p.testing_interruption.interruption.stroop_tasks)
         print("totalNumberOfmathTasks: ", totalNumberOfStroopTasks)
         stroopData.average_time = totalTime/totalNumberOfStroopTasks
         averageTimeStroopInterruptions = stroopData.average_time
-        print("Time during correct responses to interruptions during Assessment phase", averageTimeStroopInterruptions,"\n")
+        percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        print("Time during correct responses to stroop interruptions during Testing phase: ",
+              averageTimeMathInterruptions, "seconds")
+        print("Percentage correct responses to interruptions stroop during Testing phase: ", percentCorrect * 100, "%",
+              "\n")
 
 
 
