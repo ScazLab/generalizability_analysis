@@ -3,10 +3,12 @@ import os
 import copy
 import fnmatch
 import inspect
+import statistics
+import pandas as pd
 import numpy as np
 
 print("\n")
-print("TO-DO: Bugs with training interruotion phases\n")
+print("TO-DO: Bugs with training interruption phases\n")
 print("TO-DO: Save outputs to CSV\n")
 print("TO-DO: Code up more analyses and output to CSV\n")
 
@@ -266,6 +268,7 @@ def lineNumber():
 
 directory = "../pilot_data/"
 Matches = []
+pid = []
 pattern = '*.txt'
 # '(?s:.*\\.txt)\\Z'
 files = os.listdir(directory)
@@ -275,6 +278,11 @@ for filenames in Matches:
     filename = os.path.basename(filenames)
     p_id = os.path.splitext(filename)[0]
     p = Participant(p_id)
+    pid.append(p.p_id)
+    # print("List of PIDs: ", len(pid))
+    # print("PID at this point: ", p.p_id)
+
+
 
     sv = SurveyData()
 
@@ -532,6 +540,7 @@ for filenames in Matches:
 
     print("\n")
     print("*********************** Data for Participant ID: ",p.p_id, "starts here  ***********************","\n")
+
     # Analyses
     # Participant's average time for correct responses to math interruptions
     # Average time for correct responses to math interruptions during ASSESSMENT phase
@@ -838,3 +847,10 @@ for filenames in Matches:
             iterant+=1
         p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase/numberOfHanoiTasksPerPhasePerParticipant
         print("p.average_moves_to_complete: ", p.average_moves_to_complete)
+    condition = [x ** 2 for x in range(len(pid))]
+    phase = [x ** 4 for x in range(len(pid))]
+    task = [x ** 6 for x in range(len(pid))]
+    interruption = [x ** 8 for x in range(len(pid))]
+    columnTitles = {"P_ID": pid, "Condition": condition, "Phase": phase, "Task": task, "Interruptions": interruption}
+    dataframe = pd.DataFrame(columnTitles)
+    dataframe.to_csv('../DataResults/dataForAnalysis.csv')
