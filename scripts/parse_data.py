@@ -86,10 +86,11 @@ class HanoiMove():
         self.time = 0
         self.after_interruption = 0
 
-    def parse(self, pieces):
+    def parse(self, pieces, interruption_just_happened):
         self.pegs = pieces[3]
         self.status = pieces[5]
         self.time = pieces[8]
+        self.after_interruption = interruption_just_happened
 
 
 
@@ -99,6 +100,7 @@ class HanoiTask():
         self.time_to_complete = 0
         self.moves_to_complete = 0
         self.completed = False
+        self.interrupted_during_task = False
 
 
 class HanoiData():
@@ -119,11 +121,12 @@ class DrawTask():
         self.time = 0
         self.after_interruption = 0
 
-    def parse(self, pieces):
+    def parse(self, pieces, interruption_just_happened):
         self.answer = pieces[3]
         self.correct_answer = pieces[4]
         self.percentage_correct = pieces[5]
         self.time = pieces[6]
+        self.after_interruption = interruption_just_happened
 
 
 class DrawData():
@@ -243,6 +246,7 @@ class Participant():
         main_task = int(pieces[2])
         condition = int(pieces[3])
 
+
         # ~ print (int_task)
         # ~ print (main_task)
         # ~ print (condition)
@@ -295,7 +299,7 @@ averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess = []
 averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain = []
 averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest = []
 
-
+all_participants = []
 pattern = '*.txt'
 # '(?s:.*\\.txt)\\Z'
 files = os.listdir(directory)
@@ -327,6 +331,8 @@ for filenames in Matches:
     scene = SCENE_SURVEYS
 
     line_n = 0
+    
+    interruption_just_happened = 0
     for line in f:
         pieces = line.split(',')
         line_n += 1
@@ -359,7 +365,7 @@ for filenames in Matches:
             if (pieces[1] == "PRIMARY"):
                 if (pieces[2] == "HANOI"):
                     han = HanoiMove()
-                    han.parse(pieces)
+                    han.parse(pieces, 0)
                     ht.hanoi_move_list.append(han)
                     if (han.status == "complete"):
                         # ~ print ("complete")
@@ -367,7 +373,7 @@ for filenames in Matches:
                         ht = HanoiTask()
                 if (pieces[2] == "path"):
                     dr = DrawTask()
-                    dr.parse(pieces)
+                    dr.parse(pieces, 0)
                     d.draw_tasks.append(dr)
 
         if (pieces[0]) == "ASSESSMENT":
@@ -384,6 +390,7 @@ for filenames in Matches:
                 m = MathData()
 
             if (pieces[1] == "INTERRUPTION"):
+                interruption_just_happened = 1
                 if (pieces[2] == "stroop"):
                     st = StroopTask()
                     st.parse(pieces)
@@ -396,18 +403,21 @@ for filenames in Matches:
             if (pieces[1] == "PRIMARY"):
                 if (pieces[2] == "HANOI"):
                     han = HanoiMove()
-                    han.parse(pieces)
+                    han.parse(pieces, interruption_just_happened)
                     ht.hanoi_move_list.append(han)
+                    if (interruption_just_happened == 1):
+                        ht.interrupted_during_task = True
                     if (han.status == "complete"):
                         h.hanoi_tasks.append(ht)
                         ht = HanoiTask()
                 if (pieces[2] == "path"):
                     dr = DrawTask()
-                    dr.parse(pieces)
+                    dr.parse(pieces, interruption_just_happened)
                     d.draw_tasks.append(dr)
                     # p = PathTask()
                     # p.parse(pieces)
                     # d.draw_tasks.append(dr)
+                interruption_just_happened = 0
             if (pieces[1] == "SURVEY"):
                 ef = EffortData()
                 ef.parse(pieces)
@@ -443,6 +453,7 @@ for filenames in Matches:
                 m = MathData()
 
             if (pieces[1] == "INTERRUPTION"):
+                interruption_just_happened = 1
                 if (pieces[2] == "stroop"):
                     st = StroopTask()
                     st.parse(pieces)
@@ -454,15 +465,18 @@ for filenames in Matches:
             if (pieces[1] == "PRIMARY"):
                 if (pieces[2] == "HANOI"):
                     han = HanoiMove()
-                    han.parse(pieces)
+                    han.parse(pieces, interruption_just_happened)
                     ht.hanoi_move_list.append(han)
+                    if (interruption_just_happened == 1):
+                        ht.interrupted_during_task = True
                     if (han.status == "complete"):
                         h.hanoi_tasks.append(ht)
                         ht = HanoiTask()
                 if (pieces[2] == "path"):
                     dr = DrawTask()
-                    dr.parse(pieces)
+                    dr.parse(pieces, interruption_just_happened)
                     d.draw_tasks.append(dr)
+                interruption_just_happened = 0
             if (pieces[1] == "SURVEY"):
                 ef = EffortData()
                 ef.parse(pieces)
@@ -490,25 +504,21 @@ for filenames in Matches:
 
                 if (p.starting_interruption == START_INTERRUPTION_MATH and p.condition == CONDITION_SWITCH_TASK):
                     i = Interruption("math")
+                    # ~ print ("math")
+                    # ~ print (m)
                     i.interruption = copy.deepcopy(m)
                     p.training_interruption = i
-
-                    mt = MathTask()
-                    mt.parse(pieces)
-
                 if (p.starting_interruption == START_INTERRUPTION_STROOP and p.condition == CONDITION_SWITCH_TASK):
                     i = Interruption("stroop")
                     i.interruption = copy.deepcopy(s)
                     p.training_interruption = i
-                if (
-                        p.starting_interruption == START_INTERRUPTION_STROOP and p.condition == CONDITION_SWITCH_INTERRUPTION):
+                if (p.starting_interruption == START_INTERRUPTION_STROOP and p.condition == CONDITION_SWITCH_INTERRUPTION):
                     i = Interruption("math")
-                    i.interruption = copy.deepcopy(s)
-                    p.training_interruption = i
-                if (
-                        p.starting_interruption == START_INTERRUPTION_MATH and p.condition == CONDITION_SWITCH_INTERRUPTION):
-                    i = Interruption("stroop")
                     i.interruption = copy.deepcopy(m)
+                    p.training_interruption = i
+                if (p.starting_interruption == START_INTERRUPTION_MATH and p.condition == CONDITION_SWITCH_INTERRUPTION):
+                    i = Interruption("stroop")
+                    i.interruption = copy.deepcopy(s)
                     p.training_interruption = i
 
                 h = HanoiData()
@@ -517,6 +527,7 @@ for filenames in Matches:
                 m = MathData()
 
             if (pieces[1] == "INTERRUPTION"):
+                interruption_just_happened = 1
                 if (pieces[2] == "stroop"):
                     st = StroopTask()
                     st.parse(pieces)
@@ -528,15 +539,18 @@ for filenames in Matches:
             if (pieces[1] == "PRIMARY"):
                 if (pieces[2] == "HANOI"):
                     han = HanoiMove()
-                    han.parse(pieces)
+                    han.parse(pieces, interruption_just_happened)
                     ht.hanoi_move_list.append(han)
+                    if (interruption_just_happened == 1):
+                        ht.interrupted_during_task = True
                     if (han.status == "complete"):
                         h.hanoi_tasks.append(ht)
                         ht = HanoiTask()
                 if (pieces[2] == "path"):
                     dr = DrawTask()
-                    dr.parse(pieces)
+                    dr.parse(pieces, interruption_just_happened)
                     d.draw_tasks.append(dr)
+                interruption_just_happened = 0
             if (pieces[1] == "SURVEY"):
                 ef = EffortData()
                 ef.parse(pieces)
@@ -559,15 +573,23 @@ for filenames in Matches:
         i.interruption = copy.deepcopy(s)
         p.testing_interruption = i
     p.survey = sv
+    all_participants.append(p)
+    
+   
 
-##########################################
+##############################################################################################
 
+
+for p in all_participants:
 # ~ print (vars(p.survey))
 # ~ print(vars(p))
 # ~ p.print_participant()
 #
     # print("\n")
     print("*********************** Data for Participant ID: ",p.p_id, "starts here  ***********************","\n")
+    print("The condition is:" + str(p.condition))
+    print("The starting task is:" + str(p.starting_task))
+    print("The starting interruption is:" + str(p.starting_interruption))
 
     # Analyses
     # Participant's average time for correct responses to math interruptions
@@ -600,26 +622,25 @@ for filenames in Matches:
     # Average time for correct responses to math interruptions during TRAINING phase
     if p.training_interruption.name == "math":
         mathData = MathData()
-        print("p.training_interruption.name: ", p.training_interruption.name)
-        print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
-        # correctResponseCount = 0
-        # totalTime = mathData.totalTime
-        # for correctResponses in p.training_interruption.interruption.math_tasks:
-        #     if correctResponses.correct == True:
-        #         correctResponseCount += 1
-        #     totalTime += float(correctResponses.timeSpent)
-        # print("count of correct responses: ", correctResponseCount)
-        # totalNumberOfmathTasks = len(p.training_interruption.interruption.math_tasks)
-        # print("totalNumberOfmathTasks: ", totalNumberOfmathTasks)
-        # mathData.average_time = totalTime/totalNumberOfmathTasks
-        # averageTimeMathInterruptions = mathData.average_time
-        # percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        # print("Time during correct responses to math interruptions during Training phase for ",p.p_id, "is: ",
-        #       averageTimeMathInterruptions, "seconds")
-        # print("Percentage correct responses to interruptions math during Training phase for ",p.p_id, "is: ", percentCorrect * 100,"%",
-        #       "\n")
+        # ~ print("p.training_interruption.name: ", p.training_interruption.name)
+        # ~ print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
+        correctResponseCount = 0
+        totalTime = mathData.totalTime
+        # ~ print (p.training_interruption.interruption)
+        for correctResponses in p.training_interruption.interruption.math_tasks:
+            if correctResponses.correct == True:
+                correctResponseCount += 1
+            totalTime += float(correctResponses.timeSpent)
+        # ~ print("count of correct responses: ", correctResponseCount)
+        totalNumberOfmathTasks = len(p.training_interruption.interruption.math_tasks)
+        print("totalNumberOfmathTasks: ", totalNumberOfmathTasks)
+        mathData.average_time = totalTime/totalNumberOfmathTasks
+        averageTimeMathInterruptions = mathData.average_time
+        percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        print("Time during correct responses to math interruptions during Training phase for ",p.p_id, "is: ",averageTimeMathInterruptions, "seconds")
+        print("Percentage correct responses to interruptions math during Training phase for ",p.p_id, "is: ", percentCorrect * 100,"%","\n")
         averageTimeMathInterruptionsListTrain.append(mathData.average_time)
-        # print("averageTimeMathInterruptionsListTrain: ", averageTimeMathInterruptionsListTrain)
+        print("averageTimeMathInterruptionsListTrain: ", averageTimeMathInterruptionsListTrain)
 
 
     # Average time for correct responses to math interruptions during TESTING phase
@@ -675,27 +696,28 @@ for filenames in Matches:
     # Participant's average time for correct responses to stroop interruptions in Training phase
     # ********Bug...stroop interruption is labelled as Math task
     if p.training_interruption.name == "stroop":
-        print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
-        print("p.training_interruption.name: ", p.training_interruption.name)
+        # ~ print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
+        # ~ print("p.training_interruption.name: ", p.training_interruption.name)
         stroopData = StroopData()
         totalTime = stroopData.totalTime
-        # correctResponseCount = 0
-        # for correctResponses in p.training_interruption.interruption.stroop_tasks:
-        #     if correctResponses.correct == True:
-        #         correctResponseCount += 1
-        #     totalTime += float(correctResponses.timeSpent)
+        # ~ print (p.training_interruption.interruption)
+        correctResponseCount = 0
+        for correctResponses in p.training_interruption.interruption.stroop_tasks:
+            if correctResponses.correct == True:
+                correctResponseCount += 1
+            totalTime += float(correctResponses.timeSpent)
         # print("count of correct responses: ", correctResponseCount)
-        # totalNumberOfStroopTasks = len(p.training_interruption.interruption.stroop_tasks)
+        totalNumberOfStroopTasks = len(p.training_interruption.interruption.stroop_tasks)
         # print("totalNumberOfmathTasks: ", totalNumberOfStroopTasks)
-        # stroopData.average_time = totalTime/totalNumberOfStroopTasks
-        # averageTimeStroopInterruptions = stroopData.average_time
-        # percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        # print("Time during correct responses to stroop interruptions during Training phase for ",p.p_id, "is: ",
-        #       averageTimeStroopInterruptions, "seconds")
-        # print("Percentage correct responses to interruptions stroop during Training phase for ",p.p_id, "is: ", percentCorrect * 100, "%",
-        #       "\n")
+        stroopData.average_time = totalTime/totalNumberOfStroopTasks
+        averageTimeStroopInterruptions = stroopData.average_time
+        percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        print("Time during correct responses to stroop interruptions during Training phase for ",p.p_id, "is: ",
+              averageTimeStroopInterruptions, "seconds")
+        print("Percentage correct responses to interruptions stroop during Training phase for ",p.p_id, "is: ", percentCorrect * 100, "%",
+              "\n")
         averageTimeStroopInterruptionsListTrain.append(stroopData.average_time)
-        print("averageTimeStroopInterruptionsListTaining: ", averageTimeStroopInterruptionsListTrain)
+        # ~ print("averageTimeStroopInterruptionsListTaining: ", averageTimeStroopInterruptionsListTrain)
 
 
     # Average time for correct responses to stroop interruptions during TESTING phase
@@ -890,6 +912,13 @@ for filenames in Matches:
         numberOfHanoiTasksPerPhasePerParticipant = len(p.testing_task.task.hanoi_tasks)
         totalTime = 0
         for eachHanoiTask in p.testing_task.task.hanoi_tasks:
+            #####################
+            print ("Was there an interruption during the task?")
+            print (eachHanoiTask.interrupted_during_task)
+            for eachMove in eachHanoiTask.hanoi_move_list:
+                print ("interruption just happened:")
+                print (eachMove.after_interruption)
+            #####################
             p.moves_to_complete = len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
             print("totalNumberOfMovesBeforeComplete by ",p.p_id, "is: ", totalNumberOfMovesBeforeCompletePerTask)
