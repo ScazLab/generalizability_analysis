@@ -8,9 +8,9 @@ import pandas as pd
 import numpy as np
 
 print("\n")
-print("TO-DO: Bugs with training interruption phases\n")
+# print("TO-DO: Bugs with training interruption phases\n")
 print("TO-DO: Save outputs to CSV in a structured way\n")
-print("TO-DO: Code up more analyses and output to CSV\n")
+# print("TO-DO: Code up more analyses and output to CSV\n")
 
 
 #starting task
@@ -85,12 +85,14 @@ class HanoiMove():
         self.status = "incomplete"
         self.time = 0
         self.after_interruption = 0
+        self.timeSpent = 0
 
     def parse(self, pieces, interruption_just_happened):
         self.pegs = pieces[3]
         self.status = pieces[5]
         self.time = pieces[8]
         self.after_interruption = interruption_just_happened
+        self.timeSpent = pieces[6]
 
 
 
@@ -299,6 +301,14 @@ averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess = []
 averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain = []
 averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest = []
 
+avgTimesToCompletionForAllHanoiTasksListAssessment = []
+avgTimesToCompletionForAllHanoiTasksListTraining = []
+avgTimesToCompletionForAllHanoiTasksListTesting = []
+
+averageTimeMoveAfterInterruptionListAssessment =[]
+averageTimeMoveAfterInterruptionListTraining =[]
+averageTimeMoveAfterInterruptionListTesting =[]
+
 all_participants = []
 pattern = '*.txt'
 # '(?s:.*\\.txt)\\Z'
@@ -310,8 +320,6 @@ for filenames in Matches:
     p_id = os.path.splitext(filename)[0]
     p = Participant(p_id)
     pid.append(p.p_id)
-    # print("List of PIDs: ", len(pid))
-    # print("PID at this point: ", p.p_id)
 
     sv = SurveyData()
 
@@ -428,22 +436,18 @@ for filenames in Matches:
                 scene = SCENE_TRAINING
                 if (p.starting_task == START_TASK_DRAW):
                     t = Task("draw")
-                    # t = Task("hanoi")
                     t.task = copy.deepcopy(d)
                     p.assessment_task = t
                 if (p.starting_task == START_TASK_HANOI):
                     t = Task("hanoi")
-                    # t = Task("draw")
                     t.task = copy.deepcopy(h)
                     p.assessment_task = t
                 if (p.starting_interruption == START_INTERRUPTION_MATH):
                     i = Interruption("math")
-                    # i = Interruption("stroop")
                     i.interruption = copy.deepcopy(m)
                     p.assessment_interruption = i
                 if (p.starting_interruption == START_INTERRUPTION_STROOP):
                     i = Interruption("stroop")
-                    # i = Interruption("math")
                     i.interruption = copy.deepcopy(s)
                     p.assessment_interruption = i
 
@@ -585,8 +589,8 @@ for p in all_participants:
 # ~ print(vars(p))
 # ~ p.print_participant()
 #
-    # print("\n")
-    print("*********************** Data for Participant ID: ",p.p_id, "starts here  ***********************","\n")
+    print("\n")
+    print("*********************** Data for Participant ID: "+p.p_id+ " starts here  ***********************","\n")
     print("The condition is:" + str(p.condition))
     print("The starting task is:" + str(p.starting_task))
     print("The starting interruption is:" + str(p.starting_interruption))
@@ -595,7 +599,8 @@ for p in all_participants:
     # Participant's average time for correct responses to math interruptions
     # Average time for correct responses to math interruptions during ASSESSMENT phase
     if p.assessment_interruption.name == "math":
-        # print("p.assessment_interruption.name: ", p.assessment_interruption.name)
+        print("v--------------------------Assessment Phase--------------------------v")
+        print("Interruptive Task: ", p.assessment_interruption.name)
         mathData=MathData()
         totalTime = mathData.totalTime
         correctResponseCount = 0
@@ -608,19 +613,22 @@ for p in all_participants:
             # correctResponseCount+=1
         # print("count of correct responses: ", correctResponseCount)
         totalNumberOfmathTasks = len(p.assessment_interruption.interruption.math_tasks)
-        print("totalNumberOfmathTasks_Assessment for: ",p.p_id, "is: ", totalNumberOfmathTasks)
+        print("totalNumberOfmathTasks_Assessment for: "+p.p_id+ "is: ", totalNumberOfmathTasks)
         # print("getting attribute: ", getattr(mathData, 'average_time'))
         mathData.average_time = totalTime/totalNumberOfmathTasks
         averageTimeMathInterruptions = mathData.average_time
         percentCorrect = correctResponseCount/totalNumberOfmathTasks
-        print("Time during correct responses to math interruptions during assessment phase for ",p.p_id, "is: ", averageTimeMathInterruptions,"seconds")
-        print("Percentage correct responses to interruptions math during assessment phase for ",p.p_id, "is: ", percentCorrect*100,"%","\n")
+        print("Time during correct responses to math interruptions during assessment phase for "+p.p_id+ " is: ", averageTimeMathInterruptions,"seconds")
+        print("Percentage correct responses to interruptions math during assessment phase for "+p.p_id+ " is: "+str(percentCorrect*100)+"%","\n")
         averageTimeMathInterruptionsListAssess.append(mathData.average_time)
         print("averageTimeMathInterruptionsAggregated_ListAssess: ", averageTimeMathInterruptionsListAssess)
+        print("^--------------------------End of Assessment Phase--------------------------^")
 
 
     # Average time for correct responses to math interruptions during TRAINING phase
     if p.training_interruption.name == "math":
+        print("v--------------------------Training Phase--------------------------v")
+        print("Interruptive Task: ", p.training_interruption.name)
         mathData = MathData()
         # ~ print("p.training_interruption.name: ", p.training_interruption.name)
         # ~ print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
@@ -637,39 +645,41 @@ for p in all_participants:
         mathData.average_time = totalTime/totalNumberOfmathTasks
         averageTimeMathInterruptions = mathData.average_time
         percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        print("Time during correct responses to math interruptions during Training phase for ",p.p_id, "is: ",averageTimeMathInterruptions, "seconds")
-        print("Percentage correct responses to interruptions math during Training phase for ",p.p_id, "is: ", percentCorrect * 100,"%","\n")
+        print("Time during correct responses to math interruptions during Training phase for "+p.p_id+ " is: ",averageTimeMathInterruptions, "seconds")
+        print("Percentage correct responses to interruptions math during Training phase for "+p.p_id+ " is: "+str(percentCorrect * 100)+"%","\n")
         averageTimeMathInterruptionsListTrain.append(mathData.average_time)
         print("averageTimeMathInterruptionsListTrain: ", averageTimeMathInterruptionsListTrain)
+        print("^--------------------------End of Training Phase--------------------------^")
 
 
     # Average time for correct responses to math interruptions during TESTING phase
     if p.testing_interruption.name == "math":
+        print("v--------------------------Testing Phase--------------------------v")
+        print("Interruptive Task: ", p.testing_interruption.name)
         mathData = MathData()
-        # print("p.testing_interruption.name: ", p.testing_interruption.name)
         correctResponseCount = 0
         totalTime = mathData.totalTime
         for correctResponses in p.testing_interruption.interruption.math_tasks:
             if correctResponses.correct == True:
                 correctResponseCount += 1
             totalTime += float(correctResponses.timeSpent)
-        # print("count of correct responses: ", correctResponseCount)
         totalNumberOfmathTasks = len(p.testing_interruption.interruption.math_tasks)
-        # print("totalNumberOfmathTasks: ", totalNumberOfmathTasks)
         mathData.average_time = totalTime/totalNumberOfmathTasks
         averageTimeMathInterruptions = mathData.average_time
         percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        print("Time during correct responses to math interruptions during Testing phase for ",p.p_id, "is: ",
+        print("Time during correct responses to math interruptions during Testing phase for "+p.p_id+ " is: ",
               averageTimeMathInterruptions, "seconds")
-        print("Percentage correct responses to interruptions math during Testing phase for ",p.p_id, "is: ", percentCorrect * 100, "%",
+        print("Percentage correct responses to interruptions math during Testing phase for "+p.p_id+ " is: "+str(percentCorrect * 100)+"%",
               "\n")
         averageTimeMathInterruptionsListTest.append(mathData.average_time)
         print("averageTimeMathInterruptionsListTest: ", averageTimeMathInterruptionsListTest)
+        print("^--------------------------End of Testing Phase--------------------------^")
 
 
     # Participant's average time for correct responses to stroop interruptions Assessment phase
     if p.assessment_interruption.name == "stroop":
-        # print("p.assessment_interruption.name: ", p.assessment_interruption.name)
+        print("v--------------------------Assessment Phase--------------------------v")
+        print("Interruptive Task: ", p.assessment_interruption.name)
         stroopData=StroopData()
         totalTime = stroopData.totalTime
         correctResponseCount = 0
@@ -685,19 +695,20 @@ for p in all_participants:
         # print("getting attribute: ", getattr(mathData, 'average_time'))
         stroopData.average_time = totalTime/totalNumberOfStroopTasks
         averageTimeStroopInterruptions = stroopData.average_time
-        percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        print("Time during correct responses to stroop interruptions during Assessment phase for ",p.p_id, "is: ",
+        percentCorrect = correctResponseCount / totalNumberOfStroopTasks
+        print("Time during correct responses to stroop interruptions during Assessment phase for "+p.p_id+ " is: ",
               averageTimeStroopInterruptions, "seconds")
-        print("Percentage correct responses to interruptions stroop during Assessment phase for ",p.p_id, "is: ", percentCorrect * 100, "%",
+        print("Percentage correct responses to interruptions stroop during Assessment phase for "+p.p_id+ " is: "+str(percentCorrect * 100)+"%",
               "\n")
         averageTimeStroopInterruptionsListAssess.append(stroopData.average_time)
         # print("averageTimeStroopInterruptionsListAssess: ", averageTimeStroopInterruptionsListAssess)
+        print("^--------------------------End of Assessment Phase--------------------------^")
 
     # Participant's average time for correct responses to stroop interruptions in Training phase
-    # ********Bug...stroop interruption is labelled as Math task
     if p.training_interruption.name == "stroop":
+        print("v--------------------------Training Phase--------------------------v")
+        print("Interruptive Task: ", p.training_interruption.name)
         # ~ print('BUG HEREEEEEEEEEE at line {}'.format(lineNumber()), "\n")
-        # ~ print("p.training_interruption.name: ", p.training_interruption.name)
         stroopData = StroopData()
         totalTime = stroopData.totalTime
         # ~ print (p.training_interruption.interruption)
@@ -711,18 +722,21 @@ for p in all_participants:
         # print("totalNumberOfmathTasks: ", totalNumberOfStroopTasks)
         stroopData.average_time = totalTime/totalNumberOfStroopTasks
         averageTimeStroopInterruptions = stroopData.average_time
-        percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        print("Time during correct responses to stroop interruptions during Training phase for ",p.p_id, "is: ",
+        percentCorrect = correctResponseCount / totalNumberOfStroopTasks
+        print("Time during correct responses to stroop interruptions during Training phase for "+p.p_id+ " is: ",
               averageTimeStroopInterruptions, "seconds")
-        print("Percentage correct responses to interruptions stroop during Training phase for ",p.p_id, "is: ", percentCorrect * 100, "%",
+        print("Percentage correct responses to interruptions stroop during Training phase for "+p.p_id+ " is: "+str(percentCorrect * 100)+ "%",
               "\n")
         averageTimeStroopInterruptionsListTrain.append(stroopData.average_time)
         # ~ print("averageTimeStroopInterruptionsListTaining: ", averageTimeStroopInterruptionsListTrain)
+        print("^--------------------------End of Training Phase--------------------------^")
 
 
     # Average time for correct responses to stroop interruptions during TESTING phase
     if p.testing_interruption.name == "stroop":
-        # print("p.testing_interruption.name: ", p.testing_interruption.name)
+        print("v--------------------------Testing Phase--------------------------v")
+        # print("Primary Task: ", p.testing_interruption.name)
+        print("Interruptive Task: ", p.testing_interruption.name)
         stroopData = StroopData()
         totalTime = stroopData.totalTime
         correctResponseCount = 0
@@ -735,20 +749,23 @@ for p in all_participants:
         # print("totalNumberOfmathTasks: ", totalNumberOfStroopTasks)
         stroopData.average_time = totalTime/totalNumberOfStroopTasks
         averageTimeStroopInterruptions = stroopData.average_time
-        percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        print("Time during correct responses to stroop interruptions during Testing phase for ",p.p_id, "is: ",
+        percentCorrect = correctResponseCount / totalNumberOfStroopTasks
+        print("Time during correct responses to stroop interruptions during Testing phase for "+p.p_id+ " is: ",
               averageTimeStroopInterruptions, "seconds")
-        print("Percentage correct responses to interruptions stroop during Testing phase for ",p.p_id, "is: ", percentCorrect * 100, "%",
+        print("Percentage correct responses to interruptions stroop during Testing phase for "+p.p_id+ " is: "+ str(percentCorrect * 100)+ "%",
               "\n")
         averageTimeStroopInterruptionsListTest.append(stroopData.average_time)
         # print("averageTimeStroopInterruptionsListTest: ", averageTimeStroopInterruptionsListTest)
+        print("^--------------------------End of Testing Phase--------------------------^")
 
 
     # Participant's Draw task data
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during ASSESSMENT phase
     # Aggregated time is save only when participant is 100% correct
     if p.assessment_task.name == "draw":
-        # print("p.assessment_task.name: ", p.assessment_task.name)
+        print("v--------------------------Assessment Phase--------------------------v")
+        print("Primary Task: ", p.assessment_task.name)
+        print("Interruptive Task: ", p.assessment_interruption.name)
         #     totalNumberOfDrawTasks = len(p.assessment_task.task.draw_tasks)
         #     print("Number of draw tasks as primary task in assessment phase: ", totalNumberOfDrawTasks)
         drawTask = DrawTask()
@@ -776,24 +793,31 @@ for p in all_participants:
         # (17*100% + 1*50% + 2*25%)/total count * 100%
         weightedCorrectness = (totalDrawTaskEntirelyCorrect*1+fiftyPercentCorrect*.5+twentyFivePercentCorrect*.25)
         drawData.average_correctness = weightedCorrectness/totalNumberOfDrawTasks
-        print("totalDrawTaskEntirelyCorrect for ",p.p_id, "during ASSESSMENT phase is: ", totalDrawTaskEntirelyCorrect)
-        print("totalNumberOfDrawTasks for ",p.p_id, "during ASSESSMENT phase is: ", totalNumberOfDrawTasks)
+        # print("totalDrawTaskEntirelyCorrect for "+p.p_id+ "during ASSESSMENT phase is: ", totalDrawTaskEntirelyCorrect)
+        # print("totalNumberOfDrawTasks for "+p.p_id+ "during ASSESSMENT phase is: ", totalNumberOfDrawTasks)
         # print("getting attribute: ", getattr(mathData, 'average_time'))
         drawTask.percentage_correct = totalDrawTaskEntirelyCorrect/totalNumberOfDrawTasks
+        print("Percentage of average correctness across Draw Tasks for", p.p_id,
+              "during ASSESSMENT phase is " + str(drawData.average_correctness * 100) + "%")
+        print("Percentage of Draw Task gotten 100% Correct for", p.p_id,
+              "during ASSESSMENT phase is " + str(drawTask.percentage_correct * 100) + "%")
         # print("Percentage of average correctness across Draw Tasks: ", drawData.average_correctness)
         # print("Percentage of Draw Task gotten 100% Correct: ", drawTask.percentage_correct)
         drawData.averageTimeToAnswerDrawTaskEntirelyCorrect = totalTimeEntirelyCorrect/totalDrawTaskEntirelyCorrect
         averageTimeToAnswerDrawTaskEntirelyCorrect = drawData.averageTimeToAnswerDrawTaskEntirelyCorrect
         print("Time spent during 100% correct responses to draw tasks by",p.p_id, "during ASSESSMENT phase is: ", averageTimeToAnswerDrawTaskEntirelyCorrect,"\n")
         averageTimeToAnswerDrawTaskEntirelyCorrectListAssess.append(drawData.average_correctness)
-        # print("averageTimeToAnswerDrawTaskEntirelyCorrectListAssess: ", averageTimeToAnswerDrawTaskEntirelyCorrectListAssess)
+        print("averageTimeToAnswerDrawTaskEntirelyCorrectListAssess: ", averageTimeToAnswerDrawTaskEntirelyCorrectListAssess)
+        print("^--------------------------End of Assessment Phase--------------------------^")
 
 
 
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TRAINING phase
     # Aggregated time is save only when participant is 100% correct
     if p.training_task.name == "draw":
-        # print("p.training_task.name: ", p.training_task.name)
+        print("v--------------------------Training Phase--------------------------v")
+        print("Primary Task: ", p.training_task.name)
+        print("Interruptive Task: ", p.training_interruption.name)
         drawTask = DrawTask()
         totalTimeEntirelyCorrect = drawTask.time
         totalDrawTaskEntirelyCorrect = 0
@@ -812,18 +836,23 @@ for p in all_participants:
         weightedCorrectness = (totalDrawTaskEntirelyCorrect*1+fiftyPercentCorrect*.5+twentyFivePercentCorrect*.25)
         drawData.average_correctness = weightedCorrectness/totalNumberOfDrawTasks
         drawTask.percentage_correct = totalDrawTaskEntirelyCorrect/totalNumberOfDrawTasks
-        print("Percentage of average correctness across Draw Tasks for ",p.p_id, "during TRAINING phase is: ", drawData.average_correctness)
-        print("Percentage of Draw Task gotten 100% Correct for ",p.p_id, "during TRAINING phase is: ", drawTask.percentage_correct)
+        print("Percentage of average correctness across Draw Tasks for", p.p_id,
+              "during TRAINING phase is " + str(drawData.average_correctness * 100) + "%")
+        print("Percentage of Draw Task gotten 100% Correct for", p.p_id,
+              "during TRAINING phase is " + str(drawTask.percentage_correct * 100) + "%")
         drawData.averageTimeToAnswerDrawTaskEntirelyCorrect = totalTimeEntirelyCorrect/totalDrawTaskEntirelyCorrect
         averageTimeToAnswerDrawTaskEntirelyCorrect = drawData.averageTimeToAnswerDrawTaskEntirelyCorrect
         print("Time spent during 100% correct responses to draw tasks by",p.p_id, "during TRAINING phase is: ", averageTimeToAnswerDrawTaskEntirelyCorrect,"\n")
         averageTimeToAnswerDrawTaskEntirelyCorrectListTrain.append(drawData.average_correctness)
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListTrain: ", averageTimeToAnswerDrawTaskEntirelyCorrectListTrain)
+        print("^--------------------------End of Training Phase--------------------------^")
 
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TESTING phase
     # Aggregated time is save only when participant is 100% correct
     if p.testing_task.name == "draw":
-        # print("p.testing_task.name: ", p.testing_task.name)
+        print("v--------------------------Testing Phase--------------------------v")
+        print("Primary Task: ", p.testing_task.name)
+        print("Interruptive Task: ", p.testing_interruption.name)
         drawTask = DrawTask()
         totalTimeEntirelyCorrect = drawTask.time
         totalDrawTaskEntirelyCorrect = 0
@@ -842,107 +871,199 @@ for p in all_participants:
         weightedCorrectness = (totalDrawTaskEntirelyCorrect * 1 + fiftyPercentCorrect * .5 + twentyFivePercentCorrect * .25)
         drawData.average_correctness = weightedCorrectness / totalNumberOfDrawTasks
         drawTask.percentage_correct = totalDrawTaskEntirelyCorrect / totalNumberOfDrawTasks
-        print("Percentage of average correctness across Draw Tasks for",p.p_id, "during TESTING phase is: ", drawData.average_correctness)
-        print("Percentage of Draw Task gotten 100% Correct for",p.p_id, "during TESTING phase is: ", drawTask.percentage_correct)
+        print("Percentage of average correctness across Draw Tasks for",p.p_id, "during TESTING phase is "+str(drawData.average_correctness*100)+"%")
+        print("Percentage of Draw Task gotten 100% Correct for",p.p_id, "during TESTING phase is "+str(drawTask.percentage_correct*100)+"%")
         drawData.averageTimeToAnswerDrawTaskEntirelyCorrect = totalTimeEntirelyCorrect / totalDrawTaskEntirelyCorrect
         averageTimeToAnswerDrawTaskEntirelyCorrect = drawData.averageTimeToAnswerDrawTaskEntirelyCorrect
         print("Time spent during 100% correct responses to draw tasks by",p.p_id, "during TESTING phase is: ",
               averageTimeToAnswerDrawTaskEntirelyCorrect, "\n")
         averageTimeToAnswerDrawTaskEntirelyCorrectListTest.append(drawData.average_correctness)
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListTest: ", averageTimeToAnswerDrawTaskEntirelyCorrectListTest)
+        print("^--------------------------End of Testing Phase--------------------------^")
 
 
     # Participant's Hanoi task data
-    # Average time, correctness, and ratio of 100% correct responses to Hanoi Task during ASSESSMENT phase
-    # Aggregated time is save only when participant is 100% correct
+    # Hanoi Task during ASSESSMENT phase
     if p.assessment_task.name == "hanoi":
-        # print("p.assessment_task.name: ", p.assessment_task.name)
+        print("v--------------------------Assessment Phase--------------------------v")
+        print("Primary Task: "+ p.assessment_task.name)
+        print("Interruptive Task: ", p.assessment_interruption.name)
         iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase = 0
+        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
         numberOfHanoiTasksPerPhasePerParticipant = len(p.assessment_task.task.hanoi_tasks)
         totalTime = 0
-        print("numberOfHanoiTasksPerPhasePerParticipant: ", numberOfHanoiTasksPerPhasePerParticipant)
+        durationB4resumptionList = []
+        numberOfInterruptionsDuringTask = 0
         for eachHanoiTask in p.assessment_task.task.hanoi_tasks:
-            # print("number of moves incomplete and complete: ", len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list))
+            if eachHanoiTask.interrupted_during_task == True:
+                for eachMove in eachHanoiTask.hanoi_move_list:
+                    totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        numberOfInterruptionsDuringTask +=1
+                        print("Time to resume task after interruption: ", eachMove.timeSpent)
+                        durationB4resumptionList.append(float(eachMove.timeSpent))
+                        print("List of resumption times after interruption: ", durationB4resumptionList)
             p.moves_to_complete = len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            print("totalNumberOfMovesBeforeComplete: ", totalNumberOfMovesBeforeCompletePerTask)
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase += len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            print("totalNumberOfMovesBeforeComplete for ",p.p_id, "during ASSESSMENT phase is: ",totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase)
-            # Time calculations to be implemented
-            totalTime += p.assessment_task.task.hanoi_tasks[iterant].time_to_complete
-            print("time to complete task in ASSESSMENT phase for ",p.p_id, "is: ", totalTime)
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list)
             iterant+=1
-        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase/numberOfHanoiTasksPerPhasePerParticipant
-        print("p.average_moves_to_complete in assessment phase for ",p.p_id, "is: ", p.average_moves_to_complete)
-        averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess.append(p.average_moves_to_complete)
-        print("averageTimeToAnswerDrawTaskEntirelyCorrectListTest: ", averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess)
+        print("Total Number of consecutive batch of interruptions During Primary Task: ", numberOfInterruptionsDuringTask)
+        print("Total Number of Moves taken to Complete All Hanoi Tasks per Phase per Participant: ",
+              totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant)
+        print("Time to complete task: "+ str(totalTime)+ " seconds")
+        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
+        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
+        p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
+        print("p.average_time_move_after_interruption: ", p.average_time_move_after_interruption)
+        print("Average Number of Moves Before Completion of " +p.assessment_task.name+" tasks in Assessment phase by "+p.p_id+ " is", p.average_moves_to_complete)
+        avgTimesToCompletionForAllHanoiTasksListAssessment.append(p.average_time_to_complete)
+        print("avgTimesToCompletionForAllHanoiTasksListAssessment", avgTimesToCompletionForAllHanoiTasksListAssessment)
+        averageTimeMoveAfterInterruptionListAssessment.append(p.average_time_move_after_interruption)
+        print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListAssessment)
+        averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
+        print("^--------------------------End of Assessement Phase--------------------------^")
 
 
-    # Average time, correctness, and ratio of 100% correct responses to Hanoi Task during TRAINING phase
-    # Aggregated time is save only when participant is 100% correct
+
+    # Hanoi Task during TRAINING phase
     if p.training_task.name == "hanoi":
-        print("p.training_task.name: ", p.training_task.name)
+        print("v--------------------------Training Phase--------------------------v")
+        print("Primary Task: "+ p.training_task.name)
+        print("Interruptive Task: ", p.training_interruption.name)
         iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase = 0
+        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
         numberOfHanoiTasksPerPhasePerParticipant = len(p.training_task.task.hanoi_tasks)
+        # print("numberOfHanoiTasksPerPhasePerParticipant: ", numberOfHanoiTasksPerPhasePerParticipant)
         totalTime = 0
+        durationB4resumptionList = []
+        numberOfInterruptionsDuringTask = 0
         for eachHanoiTask in p.training_task.task.hanoi_tasks:
+            #####################
+            # print ("Was there an interruption during the task?")
+            # print (eachHanoiTask.interrupted_during_task)
+            if eachHanoiTask.interrupted_during_task == True:
+                for eachMove in eachHanoiTask.hanoi_move_list:
+                    # print ("interruption just happened:")
+                    # print ("eachMove.after_interruption: ", eachMove.after_interruption)
+                    # print("eachMove.timeSpent: ", eachMove.timeSpent)
+                    totalTime += float(eachMove.timeSpent)
+                    # print("Total time till this point in task: ", totalTime)
+                    if eachMove.after_interruption == 1:
+                        # print("Here's an interruption: ", eachMove.after_interruption)
+                        numberOfInterruptionsDuringTask +=1
+                        print("Time to resume task after interruption: ", eachMove.timeSpent)
+                        durationB4resumptionList.append(float(eachMove.timeSpent))
+                        print("List of resumption times after interruption: ", durationB4resumptionList)
+                        # print("Number of Interruptions During Current Task: ", numberOfInterruptionsDuringTask)
+            # print("Total Number of Interruptions During Primary Task so far: ", numberOfInterruptionsDuringTask)
+            #####################
             p.moves_to_complete = len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            print("totalNumberOfMovesBeforeComplete: ", totalNumberOfMovesBeforeCompletePerTask)
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase += len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            print("totalNumberOfMovesBeforeComplete Hanoi task in training phase: ",p.p_id, "is: ", totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase)
-            # Time calculations to be implemented
-            totalTime += p.training_task.task.hanoi_tasks[iterant].time_to_complete
-            print("time to complete task in training phase for ",p.p_id, "is: ", totalTime)
+            # print("totalNumberOfMovesBeforeCompletePerTask by "+p.p_id+ " is: ", totalNumberOfMovesBeforeCompletePerTask)
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
+            # print("totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase: ", totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant)
             iterant+=1
-        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase/numberOfHanoiTasksPerPhasePerParticipant
-        print("p.average_moves_to_complete in training phase for ",p.p_id, "is: ", p.average_moves_to_complete)
+        print("Total Number of consecutive batch of interruptions During Primary Task: ", numberOfInterruptionsDuringTask)
+        print("Total Number of Moves taken to Complete All Hanoi Tasks per Phase per Participant: ",
+              totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant)
+        print("Time to complete task: "+ str(totalTime)+ " seconds")
+        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
+        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
+        # print("sum(durationB4resumptionList)", sum(durationB4resumptionList))
+        # print("len(durationB4resumptionList)", len(durationB4resumptionList))
+        p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
+        print("p.average_time_move_after_interruption: ", p.average_time_move_after_interruption)
+        print("Average Number of Moves Before Completion of " +p.training_task.name+" tasks in Training phase by "+p.p_id+ " is", p.average_moves_to_complete)
+        avgTimesToCompletionForAllHanoiTasksListTraining.append(p.average_time_to_complete) #p.average_time_to_complete.append(totalTime)
+        print("avgTimesToCompletionForAllHanoiTasksListTraining", avgTimesToCompletionForAllHanoiTasksListTraining)
+        averageTimeMoveAfterInterruptionListTraining.append(p.average_time_move_after_interruption)
+        print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListTraining)
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
-        print("averageTimeToAnswerDrawTaskEntirelyCorrectListTest: ", averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain)
+        print("^--------------------------End of Training Phase--------------------------^")
 
-
-    # Average time, correctness, and ratio of 100% correct responses to Hanoi Task during TESTING phase
-    # Aggregated time is save only when participant is 100% correct
+    # Hanoi Task during TESTING phase
     if p.testing_task.name == "hanoi":
-        print("p.testing_task.name: ", p.testing_task.name)
+        print("v--------------------------Testing Phase--------------------------v")
+        print("Primary Task: "+ p.testing_task.name)
+        print("Interruptive Task: ", p.testing_interruption.name)
         iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase = 0
+        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
         numberOfHanoiTasksPerPhasePerParticipant = len(p.testing_task.task.hanoi_tasks)
         totalTime = 0
+        durationB4resumptionList = []
+        numberOfInterruptionsDuringTask = 0
         for eachHanoiTask in p.testing_task.task.hanoi_tasks:
-            #####################
-            print ("Was there an interruption during the task?")
-            print (eachHanoiTask.interrupted_during_task)
-            for eachMove in eachHanoiTask.hanoi_move_list:
-                print ("interruption just happened:")
-                print (eachMove.after_interruption)
-            #####################
+            if eachHanoiTask.interrupted_during_task == True:
+                for eachMove in eachHanoiTask.hanoi_move_list:
+                    totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        numberOfInterruptionsDuringTask +=1
+                        print("Time to resume task after interruption: ", eachMove.timeSpent)
+                        durationB4resumptionList.append(float(eachMove.timeSpent))
+                        print("List of resumption times after interruption: ", durationB4resumptionList)
             p.moves_to_complete = len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            print("totalNumberOfMovesBeforeComplete by ",p.p_id, "is: ", totalNumberOfMovesBeforeCompletePerTask)
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase += len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            print("totalNumberOfMovesBeforeComplete: ", totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase)
-            # Time calculations to be implemented
-            totalTime += p.testing_task.task.hanoi_tasks[iterant].time_to_complete
-            print("time to complete task: ", totalTime)
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
             iterant+=1
-        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhase/numberOfHanoiTasksPerPhasePerParticipant
-        print("p.average_moves_to_complete Testing phase: ", p.average_moves_to_complete)
+        print("Total Number of consecutive batch of interruptions During Primary Task: ", numberOfInterruptionsDuringTask)
+        print("Total Number of Moves taken to Complete All Hanoi Tasks per Phase per Participant: ",
+              totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant)
+        print("Time to complete task: "+ str(totalTime)+ " seconds")
+        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
+        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
+        p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
+        print("p.average_time_move_after_interruption: ", p.average_time_move_after_interruption)
+        print("Average Number of Moves Before Completion of " +p.testing_task.name+" tasks in Testing phase by "+p.p_id+ " is", p.average_moves_to_complete)
+        avgTimesToCompletionForAllHanoiTasksListTesting.append(p.average_time_to_complete)
+        print("avgTimesToCompletionForAllHanoiTasksListTesting", avgTimesToCompletionForAllHanoiTasksListTesting)
+        averageTimeMoveAfterInterruptionListTesting.append(p.average_time_move_after_interruption)
+        print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListTesting)
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest.append(p.average_moves_to_complete)
-        print("averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest: ",
+        print("^--------------------------End of Testing Phase--------------------------^")
+
+print("\n")
+print("Some Summaries of Stats")
+print("-------------phase results demarcation-------------")
+print("averageNumberOfMovesBeforeCompleteForAllHanoiTasksAssessList: ",
+              averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess)
+print("avgTimesToCompletionForAllHanoiTasksList: ", avgTimesToCompletionForAllHanoiTasksListAssessment)
+print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListAssessment)
+# print("Standard Dev averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess: ",
+#           str(statistics.stdev(averageNumberOfMovesBeforeCompleteForAllHanoiTasksListAssess))+ " seconds")
+print("Standard Dev avgTimesToCompletionForAllHanoiTasksList: ",
+          str(statistics.stdev(avgTimesToCompletionForAllHanoiTasksListAssessment))+ " seconds")
+print("Standard Dev averageTimeMoveAfterInterruptionList: ",
+          str(statistics.stdev(averageTimeMoveAfterInterruptionListAssessment))+ " seconds")
+
+print("-------------phase results demarcation-------------")
+print("averageNumberOfMovesBeforeCompleteForAllHanoiTasksTrainginList: ",
+              averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain)
+print("avgTimesToCompletionForAllHanoiTasksList: ", avgTimesToCompletionForAllHanoiTasksListTraining)
+print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListTraining)
+print("Standard Dev averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain: ",
+          str(statistics.stdev(averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain))+ " seconds")
+print("Standard Dev avgTimesToCompletionForAllHanoiTasksList: ",
+          str(statistics.stdev(avgTimesToCompletionForAllHanoiTasksListTraining))+ " seconds")
+print("Standard Dev averageTimeMoveAfterInterruptionList: ",
+          str(statistics.stdev(averageTimeMoveAfterInterruptionListTraining))+ " seconds")
+
+print("-------------phase results demarcation-------------")
+print("averageNumberOfMovesBeforeCompleteForAllHanoiTasksTestingList: ",
               averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest)
+print("avgTimesToCompletionForAllHanoiTasksList: ", avgTimesToCompletionForAllHanoiTasksListTesting)
+print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListTesting)
+print("Standard Dev averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest: ",
+          str(statistics.stdev(averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest))+ " seconds")
+print("Standard Dev avgTimesToCompletionForAllHanoiTasksList: ",
+          str(statistics.stdev(avgTimesToCompletionForAllHanoiTasksListTesting))+ " seconds")
+print("Standard Dev averageTimeMoveAfterInterruptionList: ",
+          str(statistics.stdev(averageTimeMoveAfterInterruptionListTesting))+ " seconds")
 
-    # print("averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest Here: ", averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest)
-
-print("Standard Dev: ",
-          statistics.stdev(averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest))
 condition = [x ** 2 for x in range(len(pid))]
 phase = [x ** 4 for x in range(len(pid))]
 task = [x ** 6 for x in range(len(pid))]
-interruption = [x ** 8 for x in range(len(pid))]
-stanDev = [x ** 10 for x in range(len(pid))]
+interruption = [x ** 10 for x in range(len(pid))]
+stanDev = [x ** 16 for x in range(len(pid))]
 columnTitles = {"P_ID": pid, "Condition": condition, "Phase": phase, "Task": task, "Interruptions": interruption, "StanDev": stanDev}
 dataframe = pd.DataFrame(columnTitles)
 dataframe.to_csv('../DataResults/dataForAnalysis_placeholder.csv')
