@@ -583,6 +583,9 @@ for filenames in Matches:
 
 ##############################################################################################
 
+p_conditions = []
+p_starting_tasks = []
+p_interruptions = []
 
 for p in all_participants:
 # ~ print (vars(p.survey))
@@ -594,6 +597,10 @@ for p in all_participants:
     print("The condition is:" + str(p.condition))
     print("The starting task is:" + str(p.starting_task))
     print("The starting interruption is:" + str(p.starting_interruption))
+
+    p_conditions.append(p.condition)
+    p_starting_tasks.append(p.starting_task)
+    p_starting_tasks.append(p.starting_interruption)
 
     # Analyses
     # Participant's average time for correct responses to math interruptions
@@ -1059,11 +1066,23 @@ print("Standard Dev avgTimesToCompletionForAllHanoiTasksList: ",
 print("Standard Dev averageTimeMoveAfterInterruptionList: ",
           str(statistics.stdev(averageTimeMoveAfterInterruptionListTesting))+ " seconds")
 
-condition = [x ** 2 for x in range(len(pid))]
+'''
+METRICS x Interruptions
+- total number of tasks
+- total amount of time on task
+- average time per task
+- percentage of all tasks correct
+- ** array of all average times 
+
+METRICS x Draw Task
+- 
+
+'''
+# condition = [x ** 2 for x in range(len(pid))]
 phase = [x ** 4 for x in range(len(pid))]
 task = [x ** 6 for x in range(len(pid))]
 interruption = [x ** 10 for x in range(len(pid))]
 stanDev = [x ** 16 for x in range(len(pid))]
-columnTitles = {"P_ID": pid, "Condition": condition, "Phase": phase, "Task": task, "Interruptions": interruption, "StanDev": stanDev}
+columnTitles = {"P_ID": pid, "Condition": p_conditions, "Phase": phase, "Task": task, "Interruptions": interruption, "StanDev": stanDev}
 dataframe = pd.DataFrame(columnTitles)
 dataframe.to_csv('../DataResults/dataForAnalysis_placeholder.csv')
