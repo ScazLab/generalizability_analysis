@@ -7,14 +7,8 @@ import statistics
 import pandas as pd
 import numpy as np
 
-print("\n")
-# print("TO-DO: Bugs with training interruption phases\n")
-print("TO-DO: Save outputs to CSV in a structured way\n")
-# print("TO-DO: Code up more analyses and output to CSV\n")
-
 
 #starting task
-
 START_TASK_DRAW = 1
 START_TASK_HANOI = 2
 
@@ -248,10 +242,10 @@ class Participant():
         main_task = int(pieces[2])
         condition = int(pieces[3])
 
-
         # ~ print (int_task)
         # ~ print (main_task)
         # ~ print (condition)
+
         if (int_task == START_INTERRUPTION_MATH):
             self.starting_interruption = START_INTERRUPTION_MATH
         if (int_task == START_INTERRUPTION_STROOP):
@@ -311,7 +305,6 @@ averageTimeMoveAfterInterruptionListTesting =[]
 
 all_participants = []
 pattern = '*.txt'
-# '(?s:.*\\.txt)\\Z'
 files = os.listdir(directory)
 Matches = fnmatch.filter(files, pattern)
 for filenames in Matches:
@@ -583,24 +576,86 @@ for filenames in Matches:
 
 ##############################################################################################
 
-p_conditions = []
-p_starting_tasks = []
-p_interruptions = []
+# PARTICIPANT DETAILS
+id_arr = []
+conditions_arr = []
+starting_task_arr = []
+starting_interruption_arr = []
+
+# ASSESSMENT (a) VARIABLES
+a_i_name = []     # interruption (i) name
+a_i_count = []    # total number of interruptions given
+a_i_percentage = [] # percentage of average correctness across interruptions
+a_i_time = []     # time during correct responses to interruptions
+a_i_times = []    # aggregated time of average times for interruptions
+
+a_p_name = []                 # primary (p) task name
+a_p_count = []                # total number of tasks given
+a_p_correctness = []          # weighted correctness across all tasks
+a_p_time = []                 # time during correct responses to tasks
+a_p_times = []                # average times to complete tasks
+a_p_percentage = []           # percentage of average correctness across tasks (draw only)
+a_p_percentage100 = []        # percentages of 100% correct responses to tasks (draw only)
+a_p_resumption = []           # time to resume after interruption (hanoi only ??)
+a_p_resumptions = []          # times to resume after interruptions (hanoi only ??)
+a_p_interruptions = []        # total number of consective batch of interruptions during task (hanoi only)
+a_p_movestotal = []           # total number of moves to complete all tasks (hanoi only)
+a_p_movetasktime = []         # average time after a move (hanoi only)
+a_p_moveinterruptedtime = []  # average time to move after interruption (hanoi only ??)
+
+# TRAINING (tr) VARIABLES
+tr_i_name = []         # interruption name
+tr_i_count = []        # total number of interruptions given
+tr_i_percentage = []   # percentage of correct reposnses
+tr_i_time = []         # time during correct responses to interruptions
+tr_i_times = []        # aggregated time of average times for interruptions
+
+tr_p_name = []                 # primary (p) task name
+tr_p_count = []                # total number of tasks given
+tr_p_correctness = []          # weighted correctness across all tasks
+tr_p_time = []                 # time during correct responses to tasks
+tr_p_times = []                # average times to complete tasks
+tr_p_percentage = []           # percentage of average correctness across tasks (draw only)
+tr_p_percentage100 = []        # percentages of 100% correct responses to tasks (draw only)
+tr_p_resumption = []           # time to resume after interruption (hanoi only ??)
+tr_p_resumptions = []          # times to resume after interruptions (hanoi only ??)
+tr_p_interruptions = []        # total number of consective batch of interruptions during task (hanoi only)
+tr_p_movestotal = []           # total number of moves to complete all tasks (hanoi only)
+tr_p_movetasktime = []         # average time after a move (hanoi only)
+tr_p_moveinterruptedtime = []  # average time to move after interruption (hanoi only ??)
+
+# TESTING (te) VARIABLES
+te_i_name = []         # interruption name
+te_i_count = []        # total number of interruptions given
+te_i_percentage = []   # percentage of correct reposnses
+te_i_time = []         # time during correct responses to interruptions
+te_i_times = []        # aggregated time of average times for interruptions
+
+te_p_name = []                 # primary (p) task name
+te_p_count = []                # total number of tasks given
+te_p_correctness = []          # correctness across all tasks
+te_p_time = []                 # time during correct responses to tasks
+te_p_times = []                # average times to complete tasks
+te_p_percentage = []           # percentage of average correctness across tasks (draw only)
+te_p_percentage100 = []        # percentages of 100% correct responses to tasks (draw only)
+te_p_resumption = []           # time to resume after interruption (hanoi only ??)
+te_p_resumptions = []          # times to resume after interruptions (hanoi only ??)
+te_p_interruptions = []        # total number of consective batch of interruptions during task (hanoi only)
+te_p_movestotal = []           # total number of moves to complete all tasks (hanoi only)
+te_p_movetasktime = []         # average time after a move (hanoi only)
+te_p_moveinterruptedtime = []  # average time to move after interruption (hanoi only ??)
 
 for p in all_participants:
-# ~ print (vars(p.survey))
-# ~ print(vars(p))
-# ~ p.print_participant()
-#
     print("\n")
     print("*********************** Data for Participant ID: "+p.p_id+ " starts here  ***********************","\n")
     print("The condition is:" + str(p.condition))
     print("The starting task is:" + str(p.starting_task))
     print("The starting interruption is:" + str(p.starting_interruption))
 
-    p_conditions.append(p.condition)
-    p_starting_tasks.append(p.starting_task)
-    p_starting_tasks.append(p.starting_interruption)
+    id_arr.append(p.p_id)
+    conditions_arr.append(p.condition)
+    starting_task_arr.append(p.starting_task)
+    starting_interruption_arr.append(p.starting_interruption)
 
     # Analyses
     # Participant's average time for correct responses to math interruptions
@@ -631,6 +686,11 @@ for p in all_participants:
         print("averageTimeMathInterruptionsAggregated_ListAssess: ", averageTimeMathInterruptionsListAssess)
         print("^--------------------------End of Assessment Phase--------------------------^")
 
+        a_i_name.append(p.assessment_interruption.name)
+        a_i_count.append(totalNumberOfmathTasks)
+        a_i_percentage.append(percentCorrect)
+        a_i_time.append(averageTimeMathInterruptions)
+        a_i_times.append(averageTimeMathInterruptionsListAssess)
 
     # Average time for correct responses to math interruptions during TRAINING phase
     if p.training_interruption.name == "math":
@@ -658,6 +718,11 @@ for p in all_participants:
         print("averageTimeMathInterruptionsListTrain: ", averageTimeMathInterruptionsListTrain)
         print("^--------------------------End of Training Phase--------------------------^")
 
+        tr_i_name.append(p.training_interruption.name)
+        tr_i_count.append(len(p.training_interruption.interruption.math_tasks))
+        tr_i_percentage.append(percentCorrect)
+        tr_i_time.append(averageTimeMathInterruptions)
+        tr_i_times.append(averageTimeMathInterruptionsListTrain)
 
     # Average time for correct responses to math interruptions during TESTING phase
     if p.testing_interruption.name == "math":
@@ -682,6 +747,11 @@ for p in all_participants:
         print("averageTimeMathInterruptionsListTest: ", averageTimeMathInterruptionsListTest)
         print("^--------------------------End of Testing Phase--------------------------^")
 
+        te_i_name.append(p.testing_interruption.name)
+        te_i_name.append(len(p.testing_interruption.interruption.math_tasks))
+        te_i_percentage.append(percentCorrect)
+        te_i_time.append(averageTimeMathInterruptions)
+        te_i_times.append(averageTimeMathInterruptionsListTest)
 
     # Participant's average time for correct responses to stroop interruptions Assessment phase
     if p.assessment_interruption.name == "stroop":
@@ -711,6 +781,12 @@ for p in all_participants:
         # print("averageTimeStroopInterruptionsListAssess: ", averageTimeStroopInterruptionsListAssess)
         print("^--------------------------End of Assessment Phase--------------------------^")
 
+        a_i_name.append(p.assessment_interruption.name)
+        a_i_count.append(totalNumberOfStroopTasks)
+        a_i_percentage.append(percentCorrect)
+        a_i_time.append(averageTimeStroopInterruptions)
+        a_i_times.append(averageTimeStroopInterruptionsListAssess)
+
     # Participant's average time for correct responses to stroop interruptions in Training phase
     if p.training_interruption.name == "stroop":
         print("v--------------------------Training Phase--------------------------v")
@@ -738,6 +814,11 @@ for p in all_participants:
         # ~ print("averageTimeStroopInterruptionsListTaining: ", averageTimeStroopInterruptionsListTrain)
         print("^--------------------------End of Training Phase--------------------------^")
 
+        tr_i_name.append(p.training_interruption.name)
+        tr_i_count.append(totalNumberOfStroopTasks)
+        tr_i_percentage.append(percentCorrect)
+        tr_i_time.append(averageTimeStroopInterruptions)
+        tr_i_times.append(averageTimeStroopInterruptionsListTrain)
 
     # Average time for correct responses to stroop interruptions during TESTING phase
     if p.testing_interruption.name == "stroop":
@@ -765,6 +846,11 @@ for p in all_participants:
         # print("averageTimeStroopInterruptionsListTest: ", averageTimeStroopInterruptionsListTest)
         print("^--------------------------End of Testing Phase--------------------------^")
 
+        te_i_name.append(p.testing_interruption.name)
+        te_i_count.append(totalNumberOfStroopTasks)
+        te_i_percentage.append(percentCorrect)
+        te_i_time.append(averageTimeStroopInterruptions)
+        te_i_times.append(averageTimeStroopInterruptionsListTest)
 
     # Participant's Draw task data
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during ASSESSMENT phase
@@ -817,7 +903,19 @@ for p in all_participants:
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListAssess: ", averageTimeToAnswerDrawTaskEntirelyCorrectListAssess)
         print("^--------------------------End of Assessment Phase--------------------------^")
 
-
+        a_p_name.append(p.assessment_task.name)
+        a_p_count.append(len(p.assessment_task.task.draw_tasks))
+        a_p_correctness.append(weightedCorrectness)
+        a_p_time.append(averageTimeToAnswerDrawTaskEntirelyCorrect)
+        a_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListAssess)
+        a_p_percentage.append(drawData.average_correctness)
+        a_p_percentage100.append(drawTask.percentage_correct)
+        a_p_resumption.append("?")             # what's the resumption lag for draw?
+        a_p_resumptions.append("?")            # what are the resumption lags for draw?
+        a_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
+        a_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
+        a_p_movetasktime.append("?")          # what is the average time after a click?
+        a_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
 
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TRAINING phase
     # Aggregated time is save only when participant is 100% correct
@@ -854,6 +952,20 @@ for p in all_participants:
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListTrain: ", averageTimeToAnswerDrawTaskEntirelyCorrectListTrain)
         print("^--------------------------End of Training Phase--------------------------^")
 
+        tr_p_name.append(p.training_task.name)
+        tr_p_count.append(totalNumberOfDrawTasks)
+        tr_p_correctness.append(weightedCorrectness)
+        tr_p_time.append(averageTimeToAnswerDrawTaskEntirelyCorrect)
+        tr_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListTrain)
+        tr_p_percentage.append(drawData.average_correctness)
+        tr_p_percentage100.append(drawTask.percentage_correct)
+        tr_p_resumption.append("?")             # what's the resumption lag for draw?
+        tr_p_resumptions.append("?")            # what are the resumption lags for draw?
+        tr_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
+        tr_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
+        tr_p_movetasktime.append("?")          # what is the average time after a click?
+        tr_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
+
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TESTING phase
     # Aggregated time is save only when participant is 100% correct
     if p.testing_task.name == "draw":
@@ -888,6 +1000,19 @@ for p in all_participants:
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListTest: ", averageTimeToAnswerDrawTaskEntirelyCorrectListTest)
         print("^--------------------------End of Testing Phase--------------------------^")
 
+        te_p_name.append(p.testing_task.name)
+        te_p_count.append(totalNumberOfDrawTasks)
+        te_p_correctness.append(weightedCorrectness)
+        te_p_time.append(averageTimeToAnswerDrawTaskEntirelyCorrect)
+        te_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListTest)
+        te_p_percentage.append(drawData.average_correctness)
+        te_p_percentage100.append(drawTask.percentage_correct)
+        te_p_resumption.append("?")             # what's the resumption lag for draw?
+        te_p_resumptions.append("?")            # what are the resumption lags for draw?
+        te_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
+        te_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
+        te_p_movetasktime.append("?")          # what is the average time after a click?
+        te_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
 
     # Participant's Hanoi task data
     # Hanoi Task during ASSESSMENT phase
@@ -930,7 +1055,19 @@ for p in all_participants:
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
         print("^--------------------------End of Assessement Phase--------------------------^")
 
-
+        a_p_name.append(p.assessment_task.name)
+        a_p_count.append(len(p.assessment_task.task.hanoi_tasks))
+        a_p_correctness.append("N/A") # hanoi doesn't have a correctness
+        a_p_time.append(totalTime) # total time on phase
+        a_p_times.append(p.average_time_to_complete) # time per hanoi question
+        a_p_percentage.append("N/A") # hanoi doesn't have a correctness
+        a_p_percentage100.append("N/A") # hanoi doesn't have a correctness
+        a_p_resumption.append("?") # what is the average resumption time?
+        a_p_resumptions.append(durationB4resumptionList)
+        a_p_interruptions.append(numberOfInterruptionsDuringTask)
+        a_p_movestotal.append(p.average_moves_to_complete)
+        a_p_movetasktime.append(averageTimeMoveAfterInterruptionListAssessment)
+        a_p_moveinterruptedtime.append(p.average_time_move_after_interruption)
 
     # Hanoi Task during TRAINING phase
     if p.training_task.name == "hanoi":
@@ -976,8 +1113,6 @@ for p in all_participants:
         print("Time to complete task: "+ str(totalTime)+ " seconds")
         p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
         p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
-        # print("sum(durationB4resumptionList)", sum(durationB4resumptionList))
-        # print("len(durationB4resumptionList)", len(durationB4resumptionList))
         p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
         print("p.average_time_move_after_interruption: ", p.average_time_move_after_interruption)
         print("Average Number of Moves Before Completion of " +p.training_task.name+" tasks in Training phase by "+p.p_id+ " is", p.average_moves_to_complete)
@@ -987,6 +1122,20 @@ for p in all_participants:
         print("averageTimeMoveAfterInterruptionList: ", averageTimeMoveAfterInterruptionListTraining)
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
         print("^--------------------------End of Training Phase--------------------------^")
+
+        tr_p_name.append(p.training_task.name)
+        tr_p_count.append(len(p.training_task.task.hanoi_tasks))
+        tr_p_correctness.append("N/A") # hanoi doesn't have a correctness
+        tr_p_time.append(totalTime) # total time on phase
+        tr_p_times.append(p.average_time_to_complete) # time per hanoi question
+        tr_p_percentage.append("N/A") # hanoi doesn't have a correctness
+        tr_p_percentage100.append("N/A") # hanoi doesn't have a correctness
+        tr_p_resumption.append("?") # what is the average resumption time?
+        tr_p_resumptions.append(durationB4resumptionList)
+        tr_p_interruptions.append(numberOfInterruptionsDuringTask)
+        tr_p_movestotal.append(p.average_moves_to_complete)
+        tr_p_movetasktime.append(averageTimeMoveAfterInterruptionListTraining)
+        tr_p_moveinterruptedtime.append(p.average_time_move_after_interruption)
 
     # Hanoi Task during TESTING phase
     if p.testing_task.name == "hanoi":
@@ -1028,6 +1177,20 @@ for p in all_participants:
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest.append(p.average_moves_to_complete)
         print("^--------------------------End of Testing Phase--------------------------^")
 
+        te_p_name.append(p.testing_task.name)
+        te_p_count.append(len(p.testing_task.task.hanoi_tasks))
+        te_p_correctness.append("N/A") # hanoi doesn't have a correctness
+        te_p_time.append(totalTime) # total time on phase
+        te_p_times.append(p.average_time_to_complete) # time per hanoi question
+        te_p_percentage.append("N/A") # hanoi doesn't have a correctness
+        te_p_percentage100.append("N/A") # hanoi doesn't have a correctness
+        te_p_resumption.append("?") # what is the average resumption time?
+        te_p_resumptions.append(durationB4resumptionList)
+        te_p_interruptions.append(numberOfInterruptionsDuringTask)
+        te_p_movestotal.append(p.average_moves_to_complete)
+        te_p_movetasktime.append(averageTimeMoveAfterInterruptionListTesting)
+        te_p_moveinterruptedtime.append(p.average_time_move_after_interruption)
+
 print("\n")
 print("Some Summaries of Stats")
 print("-------------phase results demarcation-------------")
@@ -1066,23 +1229,129 @@ print("Standard Dev avgTimesToCompletionForAllHanoiTasksList: ",
 print("Standard Dev averageTimeMoveAfterInterruptionList: ",
           str(statistics.stdev(averageTimeMoveAfterInterruptionListTesting))+ " seconds")
 
-'''
-METRICS x Interruptions
-- total number of tasks
-- total amount of time on task
-- average time per task
-- percentage of all tasks correct
-- ** array of all average times 
 
-METRICS x Draw Task
-- 
+# EXPORT METRICS TO CSV
 
-'''
-# condition = [x ** 2 for x in range(len(pid))]
-phase = [x ** 4 for x in range(len(pid))]
-task = [x ** 6 for x in range(len(pid))]
-interruption = [x ** 10 for x in range(len(pid))]
-stanDev = [x ** 16 for x in range(len(pid))]
-columnTitles = {"P_ID": pid, "Condition": p_conditions, "Phase": phase, "Task": task, "Interruptions": interruption, "StanDev": stanDev}
-dataframe = pd.DataFrame(columnTitles)
-dataframe.to_csv('../DataResults/dataForAnalysis_placeholder.csv')
+print(
+    "PID", len(id_arr), "\n", 
+    "Condition", len(conditions_arr), "\n",
+    "Starting Task", len(starting_task_arr), "\n",
+    "Starting Interruption", len(starting_interruption_arr), "\n",
+    "a_i_name", len(a_i_name), "\n",
+    "a_i_count", len(a_i_count), "\n",
+    "a_i_percentage", len(a_i_percentage), "\n",
+    "a_i_time", len(a_i_time), "\n",
+    "a_i_times", len(a_i_times), "\n",
+    "a_p_name", len(a_i_name), "\n",
+    "a_p_count", len(a_p_count), "\n",
+    "a_p_correctness", len(a_p_correctness), "\n",
+    "a_p_time", len(a_p_time), "\n",
+    "a_p_times", len(a_p_times), "\n",
+    "a_p_percentage", len(a_p_percentage), "\n",
+    "a_p_percentage100", len(a_p_percentage100), "\n",
+    "a_p_resumption", len(a_p_resumption), "\n",
+    "a_p_resumptions", len(a_p_resumptions), "\n",
+    "a_p_interruptions", len(a_p_interruptions), "\n",
+    "a_p_movestotal", len(a_p_movestotal), "\n",
+    "a_p_moveinterruptedtime", len(a_p_moveinterruptedtime), "\n",
+    "tr_i_name", len(tr_i_name), "\n",
+    "tr_i_count", len(tr_i_count),"\n",
+    "tr_i_percentage", len(tr_i_percentage), "\n",
+    "tr_i_time", len(tr_i_time), "\n",
+    "tr_i_times", len(tr_i_times), "\n",
+    "tr_p_name", len(tr_i_name), "\n",
+    "tr_p_count", len(tr_p_count), "\n",
+    "tr_p_correctness", len(tr_p_correctness), "\n",
+    "tr_p_time", len(tr_p_time), "\n",
+    "tr_p_times", len(tr_p_times), "\n",
+    "tr_p_percentage", len(tr_p_percentage), "\n",
+    "tr_p_percentage100", len(tr_p_percentage100), "\n",
+    "tr_p_resumption", len(tr_p_resumption), "\n",
+    "tr_p_resumptions", len(tr_p_resumptions), "\n",
+    "tr_p_interruptions", len(tr_p_interruptions), "\n",
+    "tr_p_movestotal", len(tr_p_movestotal), "\n",
+    "tr_p_moveinterruptedtime", len(tr_p_moveinterruptedtime), "\n", 
+    "te_i_name", len(te_i_name), "\n",
+    "te_i_count", len(te_i_count), "\n",
+    "te_i_percentage", len(te_i_percentage), "\n",
+    "te_i_time", len(te_i_time), "\n",
+    "te_i_times", len(te_i_times), "\n",
+    "te_p_name", len(te_i_name), "\n",
+    "te_p_count", len(te_p_count), "\n",
+    "te_p_correctness", len(te_p_correctness), "\n",
+    "te_p_time", len(te_p_time), "\n",
+    "te_p_times", len(te_p_times), "\n",
+    "te_p_percentage", len(te_p_percentage), "\n",
+    "te_p_percentage100", len(te_p_percentage100), "\n",
+    "te_p_resumption", len(te_p_resumption), "\n",
+    "te_p_resumptions", len(te_p_resumptions), "\n",
+    "te_p_interruptions", len(te_p_interruptions), "\n",
+    "te_p_movestotal", len(te_p_movestotal), "\n",
+    "te_p_moveinterruptedtime", len(tr_p_moveinterruptedtime), "\n"
+    )
+# columnTitles = {
+#     "PID": id_arr, 
+#     "Condition": conditions_arr, 
+#     "Starting Task": starting_task_arr, 
+#     "Starting Interruption": starting_interruption_arr, 
+    
+#     "a_i_name": a_i_name, 
+#     "a_i_count": a_i_count,
+#     "a_i_percentage": a_i_percentage,
+#     "a_i_time": a_i_time,
+#     "a_i_times": a_i_times,
+    
+#     "a_p_name": a_i_name,
+#     "a_p_count": a_p_count,
+#     "a_p_correctness": a_p_correctness,
+#     "a_p_time": a_p_time,
+#     "a_p_times": a_p_times,
+#     "a_p_percentage": a_p_percentage,
+#     "a_p_percentage100": a_p_percentage100,
+#     "a_p_resumption": a_p_resumption, 
+#     "a_p_resumptions": a_p_resumptions,
+#     "a_p_interruptions": a_p_interruptions, 
+#     "a_p_movestotal": a_p_movestotal,
+#     "a_p_moveinterruptedtime": a_p_moveinterruptedtime,
+
+#     "tr_i_name": tr_i_name, 
+#     "tr_i_count": tr_i_count,
+#     "tr_i_percentage": tr_i_percentage,
+#     "tr_i_time": tr_i_time,
+#     "tr_i_times": tr_i_times,
+    
+#     "tr_p_name": tr_i_name,
+#     "tr_p_count": tr_p_count,
+#     "tr_p_correctness": tr_p_correctness,
+#     "tr_p_time": tr_p_time,
+#     "tr_p_times": tr_p_times,
+#     "tr_p_percentage": tr_p_percentage,
+#     "tr_p_percentage100": tr_p_percentage100,
+#     "tr_p_resumption": tr_p_resumption, 
+#     "tr_p_resumptions": tr_p_resumptions,
+#     "tr_p_interruptions": tr_p_interruptions, 
+#     "tr_p_movestotal": tr_p_movestotal,
+#     "tr_p_moveinterruptedtime": tr_p_moveinterruptedtime, 
+
+#     "te_i_name": te_i_name, 
+#     "te_i_count": te_i_count,
+#     "te_i_percentage": te_i_percentage,
+#     "te_i_time": te_i_time,
+#     "te_i_times": te_i_times,
+    
+#     "te_p_name": te_i_name,
+#     "te_p_count": te_p_count,
+#     "te_p_correctness": te_p_correctness,
+#     "te_p_time": te_p_time,
+#     "te_p_times": te_p_times,
+#     "te_p_percentage": te_p_percentage,
+#     "te_p_percentage100": te_p_percentage100,
+#     "te_p_resumption": te_p_resumption, 
+#     "te_p_resumptions": te_p_resumptions,
+#     "te_p_interruptions": te_p_interruptions, 
+#     "te_p_movestotal": te_p_movestotal,
+#     "te_p_moveinterruptedtime", tr_p_moveinterruptedtime   
+#     }
+
+#dataframe = pd.DataFrame(columnTitles)
+#dataframe.to_csv('../DataResults/results.csv')
