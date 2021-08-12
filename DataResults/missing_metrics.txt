@@ -1,0 +1,17 @@
+
+#################################
+#           DRAW TASK           #
+#################################
+*_p_resumption     		# what's the resumption lag for draw?
+*_p_resumptions 		# what are the resumption lags for draw?
+*_p_interruptions	 	# how many interruptions experienced during the draw task?
+*_p_movestotal     		# how many clicks on average to complete a draw task?
+*_p_movetasktime   		# what is the average time after a click?
+*_p_moveinterruptedtime    	# how much time until a click after an interruption?
+
+
+#################################
+#           HANOI TASK          #
+#################################
+
+*_p_resumption			# what is the average resumption time for hanoi?

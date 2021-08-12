@@ -914,7 +914,7 @@ for p in all_participants:
         a_p_resumptions.append("?")            # what are the resumption lags for draw?
         a_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
         a_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
-        a_p_movetasktime.append("?")          # what is the average time after a click?
+        a_p_movetasktime.append("?")           # what is the average time after a click?
         a_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
 
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TRAINING phase
