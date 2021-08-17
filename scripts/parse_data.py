@@ -115,13 +115,18 @@ class DrawTask():
         self.correct_answer = ""
         self.percentage_correct = 0
         self.time = 0
+        self.timeSpent = 0
         self.after_interruption = 0
+        self.draw_response_list = []
+        self.draw_tasks_responses = []
+        self.interrupted_during_task = False
 
     def parse(self, pieces, interruption_just_happened):
         self.answer = pieces[3]
         self.correct_answer = pieces[4]
         self.percentage_correct = pieces[5]
         self.time = pieces[6]
+        self.timeSpent = pieces[6]
         self.after_interruption = interruption_just_happened
 
 
@@ -299,6 +304,10 @@ avgTimesToCompletionForAllHanoiTasksListAssessment = []
 avgTimesToCompletionForAllHanoiTasksListTraining = []
 avgTimesToCompletionForAllHanoiTasksListTesting = []
 
+averageTimeRespondAfterInterruptionListAssessment =[]
+averageTimeRespondAfterInterruptionListTraining =[]
+averageTimeRespondAfterInterruptionListTesting =[]
+
 averageTimeMoveAfterInterruptionListAssessment =[]
 averageTimeMoveAfterInterruptionListTraining =[]
 averageTimeMoveAfterInterruptionListTesting =[]
@@ -375,7 +384,10 @@ for filenames in Matches:
                 if (pieces[2] == "path"):
                     dr = DrawTask()
                     dr.parse(pieces, 0)
-                    d.draw_tasks.append(dr)
+                    dr.draw_response_list.append(dr)
+                    if (dr.percentage_correct == "25%" or "50%" or "100%"):
+                        dr.draw_tasks_responses.append(dr)
+
 
         if (pieces[0]) == "ASSESSMENT":
             if (scene != SCENE_ASSESSEMENT):
@@ -415,9 +427,12 @@ for filenames in Matches:
                     dr = DrawTask()
                     dr.parse(pieces, interruption_just_happened)
                     d.draw_tasks.append(dr)
-                    # p = PathTask()
-                    # p.parse(pieces)
-                    # d.draw_tasks.append(dr)
+                    dr.draw_response_list.append(dr)
+                    if (interruption_just_happened == 1):
+                        dr.interrupted_during_task = True
+                    if (dr.percentage_correct == "25%" or "50%" or "100%"):
+                        dr.draw_tasks_responses.append(dr)
+
                 interruption_just_happened = 0
             if (pieces[1] == "SURVEY"):
                 ef = EffortData()
@@ -473,7 +488,11 @@ for filenames in Matches:
                     dr = DrawTask()
                     dr.parse(pieces, interruption_just_happened)
                     d.draw_tasks.append(dr)
-                interruption_just_happened = 0
+                    dr.draw_response_list.append(dr)
+                    if (interruption_just_happened == 1):
+                        dr.interrupted_during_task = True
+                    if (dr.percentage_correct == "25%" or "50%" or "100%"):
+                        dr.draw_tasks_responses.append(dr)
             if (pieces[1] == "SURVEY"):
                 ef = EffortData()
                 ef.parse(pieces)
@@ -547,7 +566,11 @@ for filenames in Matches:
                     dr = DrawTask()
                     dr.parse(pieces, interruption_just_happened)
                     d.draw_tasks.append(dr)
-                interruption_just_happened = 0
+                    dr.draw_response_list.append(dr)
+                    if (interruption_just_happened == 1):
+                        dr.interrupted_during_task = True
+                    if (dr.percentage_correct == "25%" or "50%" or "100%"):
+                        dr.draw_tasks_responses.append(dr)
             if (pieces[1] == "SURVEY"):
                 ef = EffortData()
                 ef.parse(pieces)
@@ -901,6 +924,37 @@ for p in all_participants:
         print("Time spent during 100% correct responses to draw tasks by",p.p_id, "during ASSESSMENT phase is: ", averageTimeToAnswerDrawTaskEntirelyCorrect,"\n")
         averageTimeToAnswerDrawTaskEntirelyCorrectListAssess.append(drawData.average_correctness)
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListAssess: ", averageTimeToAnswerDrawTaskEntirelyCorrectListAssess)
+
+        iterant = 0
+        totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant = 0
+        numberOfDrawTasksPerPhasePerParticipant = len(p.assessment_task.task.draw_tasks)
+        print("numberOfDrawTasksPerPhasePerParticipant: ", numberOfDrawTasksPerPhasePerParticipant)
+        totalTime = 0
+        durationB4resumptionList = []
+        numberOfInterruptionsDuringTask = 0
+        for eachDrawTask in p.assessment_task.task.draw_tasks:
+            print(eachDrawTask.interrupted_during_task)
+            if eachDrawTask.interrupted_during_task == True:
+                for eachMove in eachDrawTask.draw_response_list:
+                    print("eachMove.timeSpent: ", eachMove.timeSpent)
+                    totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        numberOfInterruptionsDuringTask += 1
+                        print("Time to resume task after interruption: ", eachMove.timeSpent)
+                        durationB4resumptionList.append(float(eachMove.timeSpent))
+                        print("List of resumption times after interruption in phase: ", durationB4resumptionList)
+                        p.average_time_to_answer_after_interruption = sum(durationB4resumptionList) / len(
+                            durationB4resumptionList)
+            totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
+                p.assessment_task.task.draw_tasks[iterant].draw_response_list)
+            iterant += 1
+        print("Total Number of consecutive batch of interruptions During Primary Task: ",
+              numberOfInterruptionsDuringTask)
+        print("Total Number of Moves taken to Complete All Draw Tasks per Phase per Participant: ",
+              totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant)
+        print("Time to complete task: " + str(totalTime) + " seconds")
+        averageTimeRespondAfterInterruptionListAssessment.append(p.average_time_to_answer_after_interruption)
+        print("averageTimeMoveAfterInterruptionList: ", averageTimeRespondAfterInterruptionListAssessment)
         print("^--------------------------End of Assessment Phase--------------------------^")
 
         a_p_name.append(p.assessment_task.name)
@@ -910,12 +964,12 @@ for p in all_participants:
         a_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListAssess)
         a_p_percentage.append(drawData.average_correctness)
         a_p_percentage100.append(drawTask.percentage_correct)
-        a_p_resumption.append("?")             # what's the resumption lag for draw?
-        a_p_resumptions.append("?")            # what are the resumption lags for draw?
+        a_p_resumption.append(p.average_time_to_answer_after_interruption)             # what's the resumption lag for draw?
+        a_p_resumptions.append(durationB4resumptionList)            # what are the resumption lags for draw?
         a_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
-        a_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
-        a_p_movetasktime.append("?")           # what is the average time after a click?
-        a_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
+        a_p_movestotal.append("uncollected")             # how many clicks on average to complete a draw task?
+        a_p_movetasktime.append(averageTimeRespondAfterInterruptionListAssessment)           # what is the average time after a click?
+        a_p_moveinterruptedtime.append(p.average_time_to_answer_after_interruption)    # how much time until a click after an interruption?
 
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TRAINING phase
     # Aggregated time is save only when participant is 100% correct
@@ -950,6 +1004,37 @@ for p in all_participants:
         print("Time spent during 100% correct responses to draw tasks by",p.p_id, "during TRAINING phase is: ", averageTimeToAnswerDrawTaskEntirelyCorrect,"\n")
         averageTimeToAnswerDrawTaskEntirelyCorrectListTrain.append(drawData.average_correctness)
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListTrain: ", averageTimeToAnswerDrawTaskEntirelyCorrectListTrain)
+
+        iterant = 0
+        totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant = 0
+        numberOfDrawTasksPerPhasePerParticipant = len(p.training_task.task.draw_tasks)
+        print("numberOfDrawTasksPerPhasePerParticipant: ", numberOfDrawTasksPerPhasePerParticipant)
+        totalTime = 0
+        durationB4resumptionList = []
+        numberOfInterruptionsDuringTask = 0
+        for eachDrawTask in p.training_task.task.draw_tasks:
+            print (eachDrawTask.interrupted_during_task)
+            if eachDrawTask.interrupted_during_task == True:
+                for eachMove in eachDrawTask.draw_response_list:
+                    print("eachMove.timeSpent: ", eachMove.timeSpent)
+                    totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        numberOfInterruptionsDuringTask += 1
+                        print("Time to resume task after interruption: ", eachMove.timeSpent)
+                        durationB4resumptionList.append(float(eachMove.timeSpent))
+                        print("List of resumption times after interruption in phase: ", durationB4resumptionList)
+                        p.average_time_to_answer_after_interruption = sum(durationB4resumptionList) / len(
+                            durationB4resumptionList)
+            totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
+                p.training_task.task.draw_tasks[iterant].draw_response_list)
+            iterant += 1
+        print("Total Number of consecutive batch of interruptions During Primary Task: ",
+              numberOfInterruptionsDuringTask)
+        print("Total Number of Moves taken to Complete All Draw Tasks per Phase per Participant: ",
+              totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant)
+        print("Time to complete task: " + str(totalTime) + " seconds")
+        averageTimeRespondAfterInterruptionListTraining.append(p.average_time_to_answer_after_interruption)
+        print("averageTimeMoveAfterInterruptionList: ", averageTimeRespondAfterInterruptionListTraining)
         print("^--------------------------End of Training Phase--------------------------^")
 
         tr_p_name.append(p.training_task.name)
@@ -959,12 +1044,12 @@ for p in all_participants:
         tr_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListTrain)
         tr_p_percentage.append(drawData.average_correctness)
         tr_p_percentage100.append(drawTask.percentage_correct)
-        tr_p_resumption.append("?")             # what's the resumption lag for draw?
-        tr_p_resumptions.append("?")            # what are the resumption lags for draw?
+        tr_p_resumption.append(p.average_time_to_answer_after_interruption)             # what's the resumption lag for draw?
+        tr_p_resumptions.append(durationB4resumptionList)            # what are the resumption lags for draw?
         tr_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
-        tr_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
-        tr_p_movetasktime.append("?")          # what is the average time after a click?
-        tr_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
+        tr_p_movestotal.append("uncollected")             # how many clicks on average to complete a draw task?
+        tr_p_movetasktime.append(averageTimeRespondAfterInterruptionListTraining)          # what is the average time after a click?
+        tr_p_moveinterruptedtime.append(p.average_time_to_answer_after_interruption)    # how much time until a click after an interruption?
 
     # Average time, correctness, and ratio of 100% correct responses to Draw Task during TESTING phase
     # Aggregated time is save only when participant is 100% correct
@@ -998,6 +1083,37 @@ for p in all_participants:
               averageTimeToAnswerDrawTaskEntirelyCorrect, "\n")
         averageTimeToAnswerDrawTaskEntirelyCorrectListTest.append(drawData.average_correctness)
         print("averageTimeToAnswerDrawTaskEntirelyCorrectListTest: ", averageTimeToAnswerDrawTaskEntirelyCorrectListTest)
+
+        iterant = 0
+        totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant = 0
+        numberOfDrawTasksPerPhasePerParticipant = len(p.testing_task.task.draw_tasks)
+        print("numberOfDrawTasksPerPhasePerParticipant: ", numberOfDrawTasksPerPhasePerParticipant)
+        totalTime = 0
+        durationB4resumptionList = []
+        numberOfInterruptionsDuringTask = 0
+        for eachDrawTask in p.testing_task.task.draw_tasks:
+            print(eachDrawTask.interrupted_during_task)
+            if eachDrawTask.interrupted_during_task == True:
+                for eachMove in eachDrawTask.draw_response_list:
+                    print("eachMove.timeSpent: ", eachMove.timeSpent)
+                    totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        numberOfInterruptionsDuringTask += 1
+                        print("Time to resume task after interruption: ", eachMove.timeSpent)
+                        durationB4resumptionList.append(float(eachMove.timeSpent))
+                        print("List of resumption times after interruption in phase: ", durationB4resumptionList)
+                        p.average_time_to_answer_after_interruption = sum(durationB4resumptionList) / len(
+                            durationB4resumptionList)
+            totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
+                p.testing_task.task.draw_tasks[iterant].draw_response_list)
+            iterant += 1
+        print("Total Number of consecutive batch of interruptions During Primary Task: ",
+              numberOfInterruptionsDuringTask)
+        print("Total Number of Moves taken to Complete All Draw Tasks per Phase per Participant: ",
+              totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant)
+        print("Time to complete task: " + str(totalTime) + " seconds")
+        averageTimeRespondAfterInterruptionListTesting.append(p.average_time_to_answer_after_interruption)
+        print("averageTimeMoveAfterInterruptionList: ", averageTimeRespondAfterInterruptionListTesting)
         print("^--------------------------End of Testing Phase--------------------------^")
 
         te_p_name.append(p.testing_task.name)
@@ -1007,12 +1123,12 @@ for p in all_participants:
         te_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListTest)
         te_p_percentage.append(drawData.average_correctness)
         te_p_percentage100.append(drawTask.percentage_correct)
-        te_p_resumption.append("?")             # what's the resumption lag for draw?
-        te_p_resumptions.append("?")            # what are the resumption lags for draw?
+        te_p_resumption.append(p.average_time_to_answer_after_interruption)             # what's the resumption lag for draw?
+        te_p_resumptions.append(durationB4resumptionList)            # what are the resumption lags for draw?
         te_p_interruptions.append("NA")         # consecutive batch of interruptions is not relevant to draw
-        te_p_movestotal.append("?")             # how many clicks on average to complete a draw task?
-        te_p_movetasktime.append("?")          # what is the average time after a click?
-        te_p_moveinterruptedtime.append("?")    # how much time until a click after an interruption?
+        te_p_movestotal.append("uncollected")             # how many clicks on average to complete a draw task?
+        te_p_movetasktime.append(averageTimeRespondAfterInterruptionListTesting)          # what is the average time after a click?
+        te_p_moveinterruptedtime.append(p.average_time_to_answer_after_interruption)    # how much time until a click after an interruption?
 
     # Participant's Hanoi task data
     # Hanoi Task during ASSESSMENT phase
@@ -1062,7 +1178,7 @@ for p in all_participants:
         a_p_times.append(p.average_time_to_complete) # time per hanoi question
         a_p_percentage.append("N/A") # hanoi doesn't have a correctness
         a_p_percentage100.append("N/A") # hanoi doesn't have a correctness
-        a_p_resumption.append("?") # what is the average resumption time?
+        a_p_resumption.append(p.average_time_move_after_interruption) # what is the average resumption time?
         a_p_resumptions.append(durationB4resumptionList)
         a_p_interruptions.append(numberOfInterruptionsDuringTask)
         a_p_movestotal.append(p.average_moves_to_complete)
@@ -1130,7 +1246,7 @@ for p in all_participants:
         tr_p_times.append(p.average_time_to_complete) # time per hanoi question
         tr_p_percentage.append("N/A") # hanoi doesn't have a correctness
         tr_p_percentage100.append("N/A") # hanoi doesn't have a correctness
-        tr_p_resumption.append("?") # what is the average resumption time?
+        tr_p_resumption.append(p.average_time_move_after_interruption) # what is the average resumption time?
         tr_p_resumptions.append(durationB4resumptionList)
         tr_p_interruptions.append(numberOfInterruptionsDuringTask)
         tr_p_movestotal.append(p.average_moves_to_complete)
@@ -1184,7 +1300,7 @@ for p in all_participants:
         te_p_times.append(p.average_time_to_complete) # time per hanoi question
         te_p_percentage.append("N/A") # hanoi doesn't have a correctness
         te_p_percentage100.append("N/A") # hanoi doesn't have a correctness
-        te_p_resumption.append("?") # what is the average resumption time?
+        te_p_resumption.append(p.average_time_move_after_interruption) # what is the average resumption time?
         te_p_resumptions.append(durationB4resumptionList)
         te_p_interruptions.append(numberOfInterruptionsDuringTask)
         te_p_movestotal.append(p.average_moves_to_complete)
