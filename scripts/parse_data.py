@@ -1354,9 +1354,9 @@ for p in all_participants:
 
 columnTitles = {
     "PID": id_arr, 
+    "Starting Interruption": starting_interruption_arr,
+    "Starting Task": starting_task_arr,
     "Condition": conditions_arr, 
-    "Starting Task": starting_task_arr, 
-    "Starting Interruption": starting_interruption_arr, 
     
     "d_age": d_age,
     "d_gender": d_gender,
