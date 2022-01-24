@@ -614,44 +614,38 @@ a_p_post_resumption = []           # time to resume after interruption (hanoi on
 a_p_post_movestotal = []           # total number of moves to complete all tasks (hanoi only)
 
 # TRAINING (tr) VARIABLES
-tr_i_name = []         # interruption name
-tr_i_count = []        # total number of interruptions given
-tr_i_percentage = []   # percentage of correct reposnses
-tr_i_time = []         # time during correct responses to interruptions
-tr_i_times = []        # aggregated time of average times for interruptions
+tr_i_name = []     # interruption (i) name
+tr_i_pre_percentage = [] # percentage of average correctness across interruptions
+tr_i_pre_time = []     # time during correct responses to interruptions
+tr_i_post_percentage = [] # percentage of average correctness across interruptions
+tr_i_post_time = []     # time during correct responses to interruptions
 
 tr_p_name = []                 # primary (p) task name
-tr_p_count = []                # total number of tasks given
-tr_p_correctness = []          # weighted correctness across all tasks
-tr_p_time = []                 # time during correct responses to tasks
-tr_p_times = []                # average times to complete tasks
-tr_p_percentage = []           # percentage of average correctness across tasks (draw only)
-tr_p_percentage100 = []        # percentages of 100% correct responses to tasks (draw only)
-tr_p_resumption = []           # time to resume after interruption (hanoi only ??)
-tr_p_resumptions = []          # times to resume after interruptions (hanoi only ??)
-tr_p_interruptions = []        # total number of consective batch of interruptions during task (hanoi only)
-tr_p_movestotal = []           # total number of moves to complete all tasks (hanoi only)
-tr_p_movetasktime = []         # average time after a move (hanoi only)
+tr_p_pre_correctness = []          # weighted correctness across all tasks
+tr_p_pre_time = []                 # time during correct responses to tasks
+tr_p_pre_resumption = []           # time to resume after interruption (hanoi only ??)
+tr_p_pre_movestotal = []           # total number of moves to complete all tasks (hanoi only)
+tr_p_post_correctness = []          # weighted correctness across all tasks
+tr_p_post_time = []                 # time during correct responses to tasks
+tr_p_post_resumption = []           # time to resume after interruption (hanoi only ??)
+tr_p_post_movestotal = []           # total number of moves to complete all tasks (hanoi only)
 
 # TESTING (te) VARIABLES
-te_i_name = []         # interruption name
-te_i_count = []        # total number of interruptions given
-te_i_percentage = []   # percentage of correct reposnses
-te_i_time = []         # time during correct responses to interruptions
-te_i_times = []        # aggregated time of average times for interruptions
+te_i_name = []     # interruption (i) name
+te_i_pre_percentage = [] # percentage of average correctness across interruptions
+te_i_pre_time = []     # time during correct responses to interruptions
+te_i_post_percentage = [] # percentage of average correctness across interruptions
+te_i_post_time = []     # time during correct responses to interruptions
 
 te_p_name = []                 # primary (p) task name
-te_p_count = []                # total number of tasks given
-te_p_correctness = []          # correctness across all tasks
-te_p_time = []                 # time during correct responses to tasks
-te_p_times = []                # average times to complete tasks
-te_p_percentage = []           # percentage of average correctness across tasks (draw only)
-te_p_percentage100 = []        # percentages of 100% correct responses to tasks (draw only)
-te_p_resumption = []           # time to resume after interruption (hanoi only ??)
-te_p_resumptions = []          # times to resume after interruptions (hanoi only ??)
-te_p_interruptions = []        # total number of consective batch of interruptions during task (hanoi only)
-te_p_movestotal = []           # total number of moves to complete all tasks (hanoi only)
-te_p_movetasktime = []         # average time after a move (hanoi only)
+te_p_pre_correctness = []          # weighted correctness across all tasks
+te_p_pre_time = []                 # time during correct responses to tasks
+te_p_pre_resumption = []           # time to resume after interruption (hanoi only ??)
+te_p_pre_movestotal = []           # total number of moves to complete all tasks (hanoi only)
+te_p_post_correctness = []          # weighted correctness across all tasks
+te_p_post_time = []                 # time during correct responses to tasks
+te_p_post_resumption = []           # time to resume after interruption (hanoi only ??)
+te_p_post_movestotal = []           # total number of moves to complete all tasks (hanoi only)
 
 for p in all_participants:
     print(p.p_id)
@@ -703,7 +697,6 @@ for p in all_participants:
         post_percentCorrect = post_correctResponseCount/prepost
         print('POST: count = %d, percentage = %2.2f, time = %f' % (prepost, post_percentCorrect, post_averageTimeMathInterruptions))
 
-        
         # record data
         a_i_name.append(p.assessment_interruption.name)
         a_i_pre_percentage.append(pre_percentCorrect)
@@ -712,58 +705,72 @@ for p in all_participants:
         a_i_post_time.append(post_averageTimeMathInterruptions)
         
     if p.training_interruption.name == "math":
-        mathData = MathData()
-
-        # determine the total time spent and number of correct answers in this phase
-        correctResponseCount = 0
-        totalTime = mathData.totalTime
-        for correctResponses in p.training_interruption.interruption.math_tasks:
-            if correctResponses.correct == True:
-                correctResponseCount += 1
-            totalTime += float(correctResponses.timeSpent)
-        totalNumberOfmathTasks = len(p.training_interruption.interruption.math_tasks)
+        mathData=MathData()
         
-        # calculate average time per given task
-        mathData.average_time = totalTime/totalNumberOfmathTasks
-        averageTimeMathInterruptions = mathData.average_time
-        averageTimeMathInterruptionsListTrain.append(mathData.average_time)
+        # pre
+        pre_totalTime = 0 #mathData.totalTime
+        pre_correctResponseCount = 0
+        for correctResponses in p.training_interruption.interruption.math_tasks[:prepost]:
+            if correctResponses.correct == True:
+                pre_correctResponseCount += 1
+            pre_totalTime += float(correctResponses.timeSpent)
+        pre_averageTimeMathInterruptions = pre_totalTime/prepost
+        pre_percentCorrect = pre_correctResponseCount/prepost
+        print('PRE: count = %d, percentage = %2.2f, time = %f' % (prepost, pre_percentCorrect, pre_averageTimeMathInterruptions))
 
-        # calculate the percentage of tasks answered correctly
-        percentCorrect = correctResponseCount / totalNumberOfmathTasks
+        # post
+        post_totalTime = 0 #mathData.totalTime
+        post_correctResponseCount = 0
+        for correctResponses in p.training_interruption.interruption.math_tasks[
+            len(p.training_interruption.interruption.math_tasks)-prepost:
+        ]:
+            if correctResponses.correct == True:
+                post_correctResponseCount += 1
+            post_totalTime += float(correctResponses.timeSpent)
+        post_averageTimeMathInterruptions = post_totalTime/prepost
+        post_percentCorrect = post_correctResponseCount/prepost
+        print('POST: count = %d, percentage = %2.2f, time = %f' % (prepost, post_percentCorrect, post_averageTimeMathInterruptions))
 
         # record data
         tr_i_name.append(p.training_interruption.name)
-        tr_i_count.append(len(p.training_interruption.interruption.math_tasks))
-        tr_i_percentage.append(percentCorrect)
-        tr_i_time.append(averageTimeMathInterruptions)
-        tr_i_times.append(averageTimeMathInterruptionsListTrain)
+        tr_i_pre_percentage.append(pre_percentCorrect)
+        tr_i_pre_time.append(pre_averageTimeMathInterruptions)
+        tr_i_post_percentage.append(post_percentCorrect)
+        tr_i_post_time.append(post_averageTimeMathInterruptions)
 
     if p.testing_interruption.name == "math":
-        mathData = MathData()
-
-        # determine the total time spent and number of correct tasks in this phase
-        correctResponseCount = 0
-        totalTime = mathData.totalTime
-        for correctResponses in p.testing_interruption.interruption.math_tasks:
+        mathData=MathData()
+        
+        # pre
+        pre_totalTime = 0 #mathData.totalTime
+        pre_correctResponseCount = 0
+        for correctResponses in p.testing_interruption.interruption.math_tasks[:prepost]:
             if correctResponses.correct == True:
-                correctResponseCount += 1
-            totalTime += float(correctResponses.timeSpent)
-        totalNumberOfmathTasks = len(p.testing_interruption.interruption.math_tasks)
-        
-        # calculate the time spent per given task
-        mathData.average_time = totalTime/totalNumberOfmathTasks
-        averageTimeMathInterruptions = mathData.average_time
-        averageTimeMathInterruptionsListTest.append(mathData.average_time)
-        
-        # calculate the percentage of tasks answered correctly
-        percentCorrect = correctResponseCount / totalNumberOfmathTasks
-        
+                pre_correctResponseCount += 1
+            pre_totalTime += float(correctResponses.timeSpent)
+        pre_averageTimeMathInterruptions = pre_totalTime/prepost
+        pre_percentCorrect = pre_correctResponseCount/prepost
+        print('PRE: count = %d, percentage = %2.2f, time = %f' % (prepost, pre_percentCorrect, pre_averageTimeMathInterruptions))
+
+        # post
+        post_totalTime = 0 #mathData.totalTime
+        post_correctResponseCount = 0
+        for correctResponses in p.testing_interruption.interruption.math_tasks[
+            len(p.testing_interruption.interruption.math_tasks)-prepost:
+        ]:
+            if correctResponses.correct == True:
+                post_correctResponseCount += 1
+            post_totalTime += float(correctResponses.timeSpent)
+        post_averageTimeMathInterruptions = post_totalTime/prepost
+        post_percentCorrect = post_correctResponseCount/prepost
+        print('POST: count = %d, percentage = %2.2f, time = %f' % (prepost, post_percentCorrect, post_averageTimeMathInterruptions))
+
         # record data
         te_i_name.append(p.testing_interruption.name)
-        te_i_count.append(len(p.testing_interruption.interruption.math_tasks))
-        te_i_percentage.append(percentCorrect)
-        te_i_time.append(averageTimeMathInterruptions)
-        te_i_times.append(averageTimeMathInterruptionsListTest)
+        te_i_pre_percentage.append(pre_percentCorrect)
+        te_i_pre_time.append(pre_averageTimeMathInterruptions)
+        te_i_post_percentage.append(post_percentCorrect)
+        te_i_post_time.append(post_averageTimeMathInterruptions)
 
     if p.assessment_interruption.name == "stroop":
         stroopData=StroopData()
@@ -800,50 +807,72 @@ for p in all_participants:
         a_i_post_time.append(post_averageTimeStroopInterruptions)
 
     if p.training_interruption.name == "stroop":
-        stroopData = StroopData()
+        stroopData=StroopData()
         
-        totalTime = stroopData.totalTime
-        correctResponseCount = 0
-        for correctResponses in p.training_interruption.interruption.stroop_tasks:
+        # pre
+        pre_totalTime = 0 #mathData.totalTime
+        pre_correctResponseCount = 0
+        for correctResponses in p.training_interruption.interruption.stroop_tasks[:prepost]:
             if correctResponses.correct == True:
-                correctResponseCount += 1
-            totalTime += float(correctResponses.timeSpent)
-        totalNumberOfStroopTasks = len(p.training_interruption.interruption.stroop_tasks)
-        
-        stroopData.average_time = totalTime/totalNumberOfStroopTasks
-        averageTimeStroopInterruptions = stroopData.average_time
-        averageTimeStroopInterruptionsListTrain.append(stroopData.average_time)
-        
-        percentCorrect = correctResponseCount / totalNumberOfStroopTasks
-        
+                pre_correctResponseCount += 1
+            pre_totalTime += float(correctResponses.timeSpent)
+        pre_averageTimeStroopInterruptions = pre_totalTime/prepost
+        pre_percentCorrect = pre_correctResponseCount/prepost
+        print('PRE: count = %d, percentage = %2.2f, time = %f' % (prepost, pre_percentCorrect, pre_averageTimeStroopInterruptions))
+
+        # post
+        post_totalTime = 0 #mathData.totalTime
+        post_correctResponseCount = 0
+        for correctResponses in p.training_interruption.interruption.stroop_tasks[
+            len(p.training_interruption.interruption.stroop_tasks)-prepost:
+        ]:
+            if correctResponses.correct == True:
+                post_correctResponseCount += 1
+            post_totalTime += float(correctResponses.timeSpent)
+        post_averageTimeStroopInterruptions = post_totalTime/prepost
+        post_percentCorrect = post_correctResponseCount/prepost
+        print('POST: count = %d, percentage = %2.2f, time = %f' % (prepost, post_percentCorrect, post_averageTimeStroopInterruptions))
+
+        # record data
         tr_i_name.append(p.training_interruption.name)
-        tr_i_count.append(totalNumberOfStroopTasks)
-        tr_i_percentage.append(percentCorrect)
-        tr_i_time.append(averageTimeStroopInterruptions)
-        tr_i_times.append(averageTimeStroopInterruptionsListTrain)
+        tr_i_pre_percentage.append(pre_percentCorrect)
+        tr_i_pre_time.append(pre_averageTimeStroopInterruptions)
+        tr_i_post_percentage.append(post_percentCorrect)
+        tr_i_post_time.append(post_averageTimeStroopInterruptions)
 
     if p.testing_interruption.name == "stroop":
-        stroopData = StroopData()
-
-        totalTime = stroopData.totalTime
-        correctResponseCount = 0
-        for correctResponses in p.testing_interruption.interruption.stroop_tasks:
+        stroopData=StroopData()
+        
+        # pre
+        pre_totalTime = 0 #mathData.totalTime
+        pre_correctResponseCount = 0
+        for correctResponses in p.testing_interruption.interruption.stroop_tasks[:prepost]:
             if correctResponses.correct == True:
-                correctResponseCount += 1
-            totalTime += float(correctResponses.timeSpent)
-        totalNumberOfStroopTasks = len(p.testing_interruption.interruption.stroop_tasks)
-        
-        stroopData.average_time = totalTime/totalNumberOfStroopTasks
-        averageTimeStroopInterruptions = stroopData.average_time
-        averageTimeStroopInterruptionsListTest.append(stroopData.average_time)
-        
-        percentCorrect = correctResponseCount / totalNumberOfStroopTasks
-        
+                pre_correctResponseCount += 1
+            pre_totalTime += float(correctResponses.timeSpent)
+        pre_averageTimeStroopInterruptions = pre_totalTime/prepost
+        pre_percentCorrect = pre_correctResponseCount/prepost
+        print('PRE: count = %d, percentage = %2.2f, time = %f' % (prepost, pre_percentCorrect, pre_averageTimeStroopInterruptions))
+
+        # post
+        post_totalTime = 0 #mathData.totalTime
+        post_correctResponseCount = 0
+        for correctResponses in p.testing_interruption.interruption.stroop_tasks[
+            len(p.testing_interruption.interruption.stroop_tasks)-prepost:
+        ]:
+            if correctResponses.correct == True:
+                post_correctResponseCount += 1
+            post_totalTime += float(correctResponses.timeSpent)
+        post_averageTimeStroopInterruptions = post_totalTime/prepost
+        post_percentCorrect = post_correctResponseCount/prepost
+        print('POST: count = %d, percentage = %2.2f, time = %f' % (prepost, post_percentCorrect, post_averageTimeStroopInterruptions))
+
+        # record data
         te_i_name.append(p.testing_interruption.name)
-        te_i_count.append(totalNumberOfStroopTasks)
-        te_i_percentage.append(percentCorrect)
-        te_i_time.append(averageTimeStroopInterruptions)
-        te_i_times.append(averageTimeStroopInterruptionsListTest)
+        te_i_pre_percentage.append(pre_percentCorrect)
+        te_i_pre_time.append(pre_averageTimeStroopInterruptions)
+        te_i_post_percentage.append(post_percentCorrect)
+        te_i_post_time.append(post_averageTimeStroopInterruptions)
 
     if p.assessment_task.name == "draw":
         drawTask = DrawTask()
@@ -920,127 +949,153 @@ for p in all_participants:
     if p.training_task.name == "draw":
         drawTask = DrawTask()
         drawData = DrawData()
-
-        totalTimeEntirelyCorrect = drawTask.time
-        totalDrawTaskEntirelyCorrect = 0
-        fiftyPercentCorrect = 0
-        twentyFivePercentCorrect = 0
-        for correctResponses in p.training_task.task.draw_tasks:
+        
+        # pre
+        pre_totalTimeEntirelyCorrect = 0
+        pre_totalDrawTaskEntirelyCorrect = 0 # 
+        pre_fiftyPercentCorrect = 0
+        pre_twentyFivePercentCorrect = 0        
+        for correctResponses in p.training_task.task.draw_tasks[:prepost]:
             if correctResponses.percentage_correct == "100%":
-                totalDrawTaskEntirelyCorrect +=1
-                totalTimeEntirelyCorrect += float(correctResponses.time)
+                pre_totalDrawTaskEntirelyCorrect +=1
+                pre_totalTimeEntirelyCorrect += float(correctResponses.time)
             if correctResponses.percentage_correct == "50%":
-                fiftyPercentCorrect +=1
+                pre_fiftyPercentCorrect +=1
             if correctResponses.percentage_correct == "25%":
-                twentyFivePercentCorrect +=1
-        totalNumberOfDrawTasks = len(p.training_task.task.draw_tasks)
-        weightedCorrectness = (totalDrawTaskEntirelyCorrect*1+fiftyPercentCorrect*.5+twentyFivePercentCorrect*.25)
-        drawData.average_correctness = weightedCorrectness/totalNumberOfDrawTasks
-        drawTask.percentage_correct = totalDrawTaskEntirelyCorrect/totalNumberOfDrawTasks
+                pre_twentyFivePercentCorrect +=1
+        pre_weightedCorrectness = (pre_totalDrawTaskEntirelyCorrect*1+pre_fiftyPercentCorrect*.5+pre_twentyFivePercentCorrect*.25)
+
+        # post
+        post_totalTimeEntirelyCorrect = 0
+        post_totalDrawTaskEntirelyCorrect = 0 # 
+        post_fiftyPercentCorrect = 0
+        post_twentyFivePercentCorrect = 0        
+        for correctResponses in p.training_task.task.draw_tasks[
+            len(p.training_task.task.draw_tasks)-prepost:
+        ]:
+            if correctResponses.percentage_correct == "100%":
+                post_totalDrawTaskEntirelyCorrect +=1
+                post_totalTimeEntirelyCorrect += float(correctResponses.time)
+            if correctResponses.percentage_correct == "50%":
+                post_fiftyPercentCorrect +=1
+            if correctResponses.percentage_correct == "25%":
+                post_twentyFivePercentCorrect +=1
+        post_weightedCorrectness = (post_totalDrawTaskEntirelyCorrect*1+post_fiftyPercentCorrect*.5+post_twentyFivePercentCorrect*.25)
         
-        drawData.averageTimeToAnswerDrawTaskEntirelyCorrect = totalTimeEntirelyCorrect/totalDrawTaskEntirelyCorrect
-        averageTimeToAnswerDrawTaskEntirelyCorrect = drawData.averageTimeToAnswerDrawTaskEntirelyCorrect
-        averageTimeToAnswerDrawTaskEntirelyCorrectListTrain.append(drawData.average_correctness)
-        
-        iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant = 0
-        numberOfDrawTasksPerPhasePerParticipant = len(p.training_task.task.draw_tasks)
-        
-        totalTime = 0
-        durationB4resumptionList = []
-        numberOfInterruptionsDuringTask = 0
-        for eachDrawTask in p.training_task.task.draw_tasks:
+        # time spent to answer correctly
+        try:
+            pre_averageTimeToAnswerDrawTaskEntirelyCorrect = pre_totalTimeEntirelyCorrect/pre_totalDrawTaskEntirelyCorrect
+        except ZeroDivisionError:
+            pre_averageTimeToAnswerDrawTaskEntirelyCorrect = 0
+        try:
+            post_averageTimeToAnswerDrawTaskEntirelyCorrect = post_totalTimeEntirelyCorrect/post_totalDrawTaskEntirelyCorrect
+        except ZeroDivisionError:
+            post_averageTimeToAnswerDrawTaskEntirelyCorrect = 0
+
+        pre_durationB4resumptionList = []
+        for eachDrawTask in p.training_task.task.draw_tasks[:prepost]:
             if eachDrawTask.interrupted_during_task == True:
                 for eachMove in eachDrawTask.draw_response_list:
-                    totalTime += float(eachMove.timeSpent)
                     if eachMove.after_interruption == 1:
-                        numberOfInterruptionsDuringTask += 1
-                        durationB4resumptionList.append(float(eachMove.timeSpent))
-                        p.average_time_to_answer_after_interruption = sum(durationB4resumptionList) / len(
-                            durationB4resumptionList)
-            totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
-                p.training_task.task.draw_tasks[iterant].draw_response_list)
-            iterant += 1
+                        pre_durationB4resumptionList.append(float(eachMove.timeSpent))
+        post_durationB4resumptionList = []
+        for eachDrawTask in p.training_task.task.draw_tasks[
+            len(p.training_task.task.draw_tasks)-prepost:
+        ]:
+            if eachDrawTask.interrupted_during_task == True:
+                for eachMove in eachDrawTask.draw_response_list:
+                    if eachMove.after_interruption == 1:
+                        post_durationB4resumptionList.append(float(eachMove.timeSpent))
+
+        # record data
+        tr_p_name.append(p.training_task.name)
+        tr_p_pre_correctness.append(pre_weightedCorrectness)
+        tr_p_pre_time.append(pre_averageTimeToAnswerDrawTaskEntirelyCorrect)
+        # tr_p_pre_resumption.append(sum(pre_durationB4resumptionList) / len(pre_durationB4resumptionList))
+        tr_p_pre_movestotal.append("N/A")
+        tr_p_post_correctness.append(post_weightedCorrectness)
+        tr_p_post_time.append(post_averageTimeToAnswerDrawTaskEntirelyCorrect)
+        # tr_p_post_resumption.append(sum(post_durationB4resumptionList) / len(post_durationB4resumptionList))
+        tr_p_post_movestotal.append("N/A")
 
         if p.control == 0:
-            averageTimeRespondAfterInterruptionListTraining.append(p.average_time_to_answer_after_interruption)
-            tr_p_resumption.append(p.average_time_to_answer_after_interruption)
+            tr_p_pre_resumption.append(sum(pre_durationB4resumptionList)/len(pre_durationB4resumptionList))
+            tr_p_post_resumption.append(sum(post_durationB4resumptionList)/len(post_durationB4resumptionList))
         else:
-            averageTimeRespondAfterInterruptionListTraining.append("N/A")
-            tr_p_resumption.append("N/A")
-
-        tr_p_name.append(p.training_task.name)
-        tr_p_count.append(totalNumberOfDrawTasks)
-        tr_p_correctness.append(weightedCorrectness)
-        tr_p_time.append(averageTimeToAnswerDrawTaskEntirelyCorrect)
-        tr_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListTrain)
-        tr_p_percentage.append(drawData.average_correctness)
-        tr_p_percentage100.append(drawTask.percentage_correct)
-        tr_p_resumptions.append(durationB4resumptionList)
-        tr_p_interruptions.append("N/A")
-        tr_p_movestotal.append("N/A")
-        tr_p_movetasktime.append(averageTimeRespondAfterInterruptionListTraining)
+            tr_p_pre_resumption.append("N/A")
+            tr_p_post_resumption.append("N/A")
         
     if p.testing_task.name == "draw":
         drawTask = DrawTask()
         drawData = DrawData()
-
-        totalTimeEntirelyCorrect = drawTask.time
-        totalDrawTaskEntirelyCorrect = 0
-        fiftyPercentCorrect = 0
-        twentyFivePercentCorrect = 0
-        for correctResponses in p.testing_task.task.draw_tasks:
+        
+        # pre
+        pre_totalTimeEntirelyCorrect = 0
+        pre_totalDrawTaskEntirelyCorrect = 0 # 
+        pre_fiftyPercentCorrect = 0
+        pre_twentyFivePercentCorrect = 0        
+        for correctResponses in p.testing_task.task.draw_tasks[:prepost]:
             if correctResponses.percentage_correct == "100%":
-                totalDrawTaskEntirelyCorrect += 1
-                totalTimeEntirelyCorrect += float(correctResponses.time)
+                pre_totalDrawTaskEntirelyCorrect +=1
+                pre_totalTimeEntirelyCorrect += float(correctResponses.time)
             if correctResponses.percentage_correct == "50%":
-                fiftyPercentCorrect += 1
+                pre_fiftyPercentCorrect +=1
             if correctResponses.percentage_correct == "25%":
-                twentyFivePercentCorrect += 1
-        totalNumberOfDrawTasks = len(p.testing_task.task.draw_tasks)
-        weightedCorrectness = (totalDrawTaskEntirelyCorrect * 1 + fiftyPercentCorrect * .5 + twentyFivePercentCorrect * .25)
-        drawData.average_correctness = weightedCorrectness / totalNumberOfDrawTasks
-        drawTask.percentage_correct = totalDrawTaskEntirelyCorrect / totalNumberOfDrawTasks
-        
-        drawData.averageTimeToAnswerDrawTaskEntirelyCorrect = 0
-        if (totalDrawTaskEntirelyCorrect != 0):
-            drawData.averageTimeToAnswerDrawTaskEntirelyCorrect = totalTimeEntirelyCorrect / totalDrawTaskEntirelyCorrect
-        averageTimeToAnswerDrawTaskEntirelyCorrect = drawData.averageTimeToAnswerDrawTaskEntirelyCorrect
-        averageTimeToAnswerDrawTaskEntirelyCorrectListTest.append(drawData.average_correctness)
+                pre_twentyFivePercentCorrect +=1
+        pre_weightedCorrectness = (pre_totalDrawTaskEntirelyCorrect*1+pre_fiftyPercentCorrect*.5+pre_twentyFivePercentCorrect*.25)
 
-        iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant = 0
-        numberOfDrawTasksPerPhasePerParticipant = len(p.testing_task.task.draw_tasks)
+        # post
+        post_totalTimeEntirelyCorrect = 0
+        post_totalDrawTaskEntirelyCorrect = 0 # 
+        post_fiftyPercentCorrect = 0
+        post_twentyFivePercentCorrect = 0        
+        for correctResponses in p.testing_task.task.draw_tasks[
+            len(p.testing_task.task.draw_tasks)-prepost:
+        ]:
+            if correctResponses.percentage_correct == "100%":
+                post_totalDrawTaskEntirelyCorrect +=1
+                post_totalTimeEntirelyCorrect += float(correctResponses.time)
+            if correctResponses.percentage_correct == "50%":
+                post_fiftyPercentCorrect +=1
+            if correctResponses.percentage_correct == "25%":
+                post_twentyFivePercentCorrect +=1
+        post_weightedCorrectness = (post_totalDrawTaskEntirelyCorrect*1+post_fiftyPercentCorrect*.5+post_twentyFivePercentCorrect*.25)
         
-        totalTime = 0
-        durationB4resumptionList = []
-        numberOfInterruptionsDuringTask = 0
-        for eachDrawTask in p.testing_task.task.draw_tasks:
+        # time spent to answer correctly
+        try:
+            pre_averageTimeToAnswerDrawTaskEntirelyCorrect = pre_totalTimeEntirelyCorrect/pre_totalDrawTaskEntirelyCorrect
+        except ZeroDivisionError:
+            pre_averageTimeToAnswerDrawTaskEntirelyCorrect = 0
+        try:
+            post_averageTimeToAnswerDrawTaskEntirelyCorrect = post_totalTimeEntirelyCorrect/post_totalDrawTaskEntirelyCorrect
+        except ZeroDivisionError:
+            post_averageTimeToAnswerDrawTaskEntirelyCorrect = 0
+
+        pre_durationB4resumptionList = []
+        for eachDrawTask in p.testing_task.task.draw_tasks[:prepost]:
             if eachDrawTask.interrupted_during_task == True:
                 for eachMove in eachDrawTask.draw_response_list:
-                    totalTime += float(eachMove.timeSpent)
                     if eachMove.after_interruption == 1:
-                        numberOfInterruptionsDuringTask += 1
-                        durationB4resumptionList.append(float(eachMove.timeSpent))
-                        p.average_time_to_answer_after_interruption = sum(durationB4resumptionList) / len(
-                            durationB4resumptionList)
-            totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
-                p.testing_task.task.draw_tasks[iterant].draw_response_list)
-            iterant += 1
-        averageTimeRespondAfterInterruptionListTesting.append(p.average_time_to_answer_after_interruption)
+                        pre_durationB4resumptionList.append(float(eachMove.timeSpent))
+        post_durationB4resumptionList = []
+        for eachDrawTask in p.testing_task.task.draw_tasks[
+            len(p.testing_task.task.draw_tasks)-prepost:
+        ]:
+            if eachDrawTask.interrupted_during_task == True:
+                for eachMove in eachDrawTask.draw_response_list:
+                    if eachMove.after_interruption == 1:
+                        post_durationB4resumptionList.append(float(eachMove.timeSpent))
 
+        # record data
         te_p_name.append(p.testing_task.name)
-        te_p_count.append(totalNumberOfDrawTasks)
-        te_p_correctness.append(weightedCorrectness)
-        te_p_time.append(averageTimeToAnswerDrawTaskEntirelyCorrect)
-        te_p_times.append(averageTimeToAnswerDrawTaskEntirelyCorrectListTest)
-        te_p_percentage.append(drawData.average_correctness)
-        te_p_percentage100.append(drawTask.percentage_correct)
-        te_p_resumption.append(p.average_time_to_answer_after_interruption)
-        te_p_resumptions.append(durationB4resumptionList)
-        te_p_interruptions.append("N/A")
-        te_p_movestotal.append("N/A")
-        te_p_movetasktime.append(averageTimeRespondAfterInterruptionListTesting)
+        te_p_pre_correctness.append(pre_weightedCorrectness)
+        te_p_pre_time.append(pre_averageTimeToAnswerDrawTaskEntirelyCorrect)
+        te_p_pre_resumption.append(sum(pre_durationB4resumptionList) / len(pre_durationB4resumptionList))
+        te_p_pre_movestotal.append("N/A")
+        te_p_post_correctness.append(post_weightedCorrectness)
+        te_p_post_time.append(post_averageTimeToAnswerDrawTaskEntirelyCorrect)
+        te_p_post_resumption.append(sum(post_durationB4resumptionList) / len(post_durationB4resumptionList))
+        te_p_post_movestotal.append("N/A")
 
     if p.assessment_task.name == "hanoi":
         # pre
@@ -1056,9 +1111,7 @@ for p in all_participants:
                         pre_durationB4resumptionList.append(float(eachMove.timeSpent))
             pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.assessment_task.task.hanoi_tasks[pre_iterant].hanoi_move_list)
             pre_iterant+=1
-        avgTimesToCompletionForAllHanoiTasksListAssessment.append(pre_totalTime/prepost)
-        averageTimeMoveAfterInterruptionListAssessment.append(sum(pre_durationB4resumptionList)/len(pre_durationB4resumptionList))
-        
+
         # post
         post_iterant = len(p.assessment_task.task.hanoi_tasks)-prepost
         post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
@@ -1074,104 +1127,106 @@ for p in all_participants:
                         post_durationB4resumptionList.append(float(eachMove.timeSpent))
             post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.assessment_task.task.hanoi_tasks[post_iterant].hanoi_move_list)
             post_iterant+=1
-        avgTimesToCompletionForAllHanoiTasksListAssessment.append(post_totalTime/prepost)
-        averageTimeMoveAfterInterruptionListAssessment.append(sum(post_durationB4resumptionList)/len(post_durationB4resumptionList))
 
         a_p_name.append(p.assessment_task.name)
         a_p_pre_correctness.append("N/A")
         a_p_pre_time.append(pre_totalTime/prepost)
         a_p_pre_resumption.append(sum(pre_durationB4resumptionList)/len(pre_durationB4resumptionList))
-        a_p_pre_movestotal.append(pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant)
+        a_p_pre_movestotal.append(pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/prepost)
         a_p_post_correctness.append("N/A")
         a_p_post_time.append(post_totalTime/prepost)
         a_p_post_resumption.append(sum(post_durationB4resumptionList)/len(post_durationB4resumptionList))
-        a_p_post_movestotal.append(post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant)
+        a_p_post_movestotal.append(post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/prepost)
 
     if p.training_task.name == "hanoi":
-        iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
-        numberOfHanoiTasksPerPhasePerParticipant = len(p.training_task.task.hanoi_tasks)
-
-        totalTime = 0
-        durationB4resumptionList = []
-        numberOfInterruptionsDuringTask = 0
-        for eachHanoiTask in p.training_task.task.hanoi_tasks:
+        # pre
+        pre_iterant = 0
+        pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
+        pre_totalTime = 0
+        pre_durationB4resumptionList = []
+        for eachHanoiTask in p.training_task.task.hanoi_tasks[:prepost]:
             if eachHanoiTask.interrupted_during_task == True:
                 for eachMove in eachHanoiTask.hanoi_move_list:
-                    totalTime += float(eachMove.timeSpent)
+                    pre_totalTime += float(eachMove.timeSpent)
                     if eachMove.after_interruption == 1:
-                        numberOfInterruptionsDuringTask +=1
-                        durationB4resumptionList.append(float(eachMove.timeSpent))
-            p.moves_to_complete = len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            iterant+=1
-        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
-        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
-        
-        avgTimesToCompletionForAllHanoiTasksListTraining.append(p.average_time_to_complete) #p.average_time_to_complete.append(totalTime)
-        averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
-        
+                        pre_durationB4resumptionList.append(float(eachMove.timeSpent))
+            pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.training_task.task.hanoi_tasks[pre_iterant].hanoi_move_list)
+            pre_iterant+=1
+
+        # post
+        post_iterant = len(p.training_task.task.hanoi_tasks)-prepost
+        post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
+        post_totalTime = 0
+        post_durationB4resumptionList = []
+        for eachHanoiTask in p.training_task.task.hanoi_tasks[
+            len(p.training_task.task.hanoi_tasks)-prepost:
+        ]:
+            if eachHanoiTask.interrupted_during_task == True:
+                for eachMove in eachHanoiTask.hanoi_move_list:
+                    post_totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        post_durationB4resumptionList.append(float(eachMove.timeSpent))
+            post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.training_task.task.hanoi_tasks[post_iterant].hanoi_move_list)
+            post_iterant+=1
+
         tr_p_name.append(p.training_task.name)
-        tr_p_count.append(len(p.training_task.task.hanoi_tasks))
-        tr_p_correctness.append("N/A") # hanoi doesn't have a correctness
-        tr_p_time.append(totalTime) # total time on phase
-        tr_p_times.append(p.average_time_to_complete) # time per hanoi question
-        tr_p_percentage.append("N/A") # hanoi doesn't have a correctness
-        tr_p_percentage100.append("N/A") # hanoi doesn't have a correctness
-        tr_p_resumptions.append(durationB4resumptionList)
-        tr_p_interruptions.append(numberOfInterruptionsDuringTask)
-        tr_p_movestotal.append(p.average_moves_to_complete)
-        tr_p_movetasktime.append(averageTimeMoveAfterInterruptionListTraining)
+        tr_p_pre_correctness.append("N/A")
+        tr_p_pre_time.append(pre_totalTime/prepost)
+        # tr_p_pre_resumption.append(sum(pre_durationB4resumptionList)/len(pre_durationB4resumptionList))
+        tr_p_pre_movestotal.append(pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/prepost)
+        tr_p_post_correctness.append("N/A")
+        tr_p_post_time.append(post_totalTime/prepost)
+        # tr_p_post_resumption.append(sum(post_durationB4resumptionList)/len(post_durationB4resumptionList))
+        tr_p_post_movestotal.append(post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/prepost)
 
         # no interruptions are experienced during the training phase of the control
         if p.control == 0:
-            p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
-            averageTimeMoveAfterInterruptionListTraining.append(p.average_time_move_after_interruption)
-            tr_p_resumption.append(p.average_time_move_after_interruption)
+            tr_p_pre_resumption.append(sum(pre_durationB4resumptionList)/len(pre_durationB4resumptionList))
+            tr_p_post_resumption.append(sum(post_durationB4resumptionList)/len(post_durationB4resumptionList))
         else:
-            averageTimeMoveAfterInterruptionListTraining.append("N/A")
-            tr_p_resumption.append("N/A")
+            tr_p_pre_resumption.append("N/A")
+            tr_p_post_resumption.append("N/A")
 
     if p.testing_task.name == "hanoi":
-        iterant = 0
-        totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
-        numberOfHanoiTasksPerPhasePerParticipant = len(p.testing_task.task.hanoi_tasks)
-        
-        totalTime = 0
-        durationB4resumptionList = []
-        numberOfInterruptionsDuringTask = 0
-        for eachHanoiTask in p.testing_task.task.hanoi_tasks:
+        # pre
+        pre_iterant = 0
+        pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
+        pre_totalTime = 0
+        pre_durationB4resumptionList = []
+        for eachHanoiTask in p.testing_task.task.hanoi_tasks[:prepost]:
             if eachHanoiTask.interrupted_during_task == True:
                 for eachMove in eachHanoiTask.hanoi_move_list:
-                    totalTime += float(eachMove.timeSpent)
+                    pre_totalTime += float(eachMove.timeSpent)
                     if eachMove.after_interruption == 1:
-                        numberOfInterruptionsDuringTask +=1
-                        durationB4resumptionList.append(float(eachMove.timeSpent))
-            p.moves_to_complete = len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            iterant+=1
-        
-        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
-        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
-        p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
-        avgTimesToCompletionForAllHanoiTasksListTesting.append(p.average_time_to_complete)
-        averageTimeMoveAfterInterruptionListTesting.append(p.average_time_move_after_interruption)
-        averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTest.append(p.average_moves_to_complete)
-        
+                        pre_durationB4resumptionList.append(float(eachMove.timeSpent))
+            pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.testing_task.task.hanoi_tasks[pre_iterant].hanoi_move_list)
+            pre_iterant+=1
+
+        # post
+        post_iterant = len(p.testing_task.task.hanoi_tasks)-prepost
+        post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant = 0
+        post_totalTime = 0
+        post_durationB4resumptionList = []
+        for eachHanoiTask in p.testing_task.task.hanoi_tasks[
+            len(p.testing_task.task.hanoi_tasks)-prepost:
+        ]:
+            if eachHanoiTask.interrupted_during_task == True:
+                for eachMove in eachHanoiTask.hanoi_move_list:
+                    post_totalTime += float(eachMove.timeSpent)
+                    if eachMove.after_interruption == 1:
+                        post_durationB4resumptionList.append(float(eachMove.timeSpent))
+            post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.testing_task.task.hanoi_tasks[post_iterant].hanoi_move_list)
+            post_iterant+=1
+
         te_p_name.append(p.testing_task.name)
-        te_p_count.append(len(p.testing_task.task.hanoi_tasks))
-        te_p_correctness.append("N/A") # hanoi doesn't have a correctness
-        te_p_time.append(totalTime)
-        te_p_times.append(p.average_time_to_complete)
-        te_p_percentage.append("N/A") # hanoi doesn't have a correctness
-        te_p_percentage100.append("N/A") # hanoi doesn't have a correctness
-        te_p_resumption.append(p.average_time_move_after_interruption)
-        te_p_resumptions.append(durationB4resumptionList)
-        te_p_interruptions.append(numberOfInterruptionsDuringTask)
-        te_p_movestotal.append(p.average_moves_to_complete)
-        te_p_movetasktime.append(averageTimeMoveAfterInterruptionListTesting)
+        te_p_pre_correctness.append("N/A")
+        te_p_pre_time.append(pre_totalTime/prepost)
+        te_p_pre_resumption.append(sum(pre_durationB4resumptionList)/len(pre_durationB4resumptionList))
+        te_p_pre_movestotal.append(pre_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/prepost)
+        te_p_post_correctness.append("N/A")
+        te_p_post_time.append(post_totalTime/prepost)
+        te_p_post_resumption.append(sum(post_durationB4resumptionList)/len(post_durationB4resumptionList))
+        te_p_post_movestotal.append(post_totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/prepost)
 
 columnTitles = {
     "PID": id_arr, 
@@ -1207,41 +1262,37 @@ columnTitles = {
     "a_p_post_resumption": a_p_post_resumption,
     "a_p_post_movestotal": a_p_post_movestotal,
 
-    "tr_i_name": tr_i_name, 
-    "tr_i_count": tr_i_count,
-    "tr_i_percentage": tr_i_percentage,
-    "tr_i_time": tr_i_time,
-    "tr_i_times": tr_i_times,
+    "tr_i_name": tr_i_name,
+    "tr_i_pre_percentage": tr_i_pre_percentage,
+    "tr_i_pre_time": tr_i_pre_time,
+    "tr_i_post_percentage": tr_i_post_percentage,
+    "tr_i_post_time": tr_i_post_time,
     
     "tr_p_name": tr_p_name,
-    "tr_p_count": tr_p_count,
-    "tr_p_correctness": tr_p_correctness,
-    "tr_p_time": tr_p_time,
-    "tr_p_times": tr_p_times,
-    "tr_p_percentage": tr_p_percentage,
-    "tr_p_percentage100": tr_p_percentage100,
-    "tr_p_resumption": tr_p_resumption, 
-    "tr_p_resumptions": tr_p_resumptions,
-    "tr_p_interruptions": tr_p_interruptions, 
-    "tr_p_movestotal": tr_p_movestotal,
+    "tr_p_pre_correctness": tr_p_pre_correctness,
+    "tr_p_pre_time": tr_p_pre_time,
+    "tr_p_pre_resumption": tr_p_pre_resumption,
+    "tr_p_pre_movestotal": tr_p_pre_movestotal,
+    "tr_p_post_correctness": tr_p_post_correctness,
+    "tr_p_post_time": tr_p_post_time,
+    "tr_p_post_resumption": tr_p_post_resumption,
+    "tr_p_post_movestotal": tr_p_post_movestotal,
 
-    "te_i_name": te_i_name, 
-    "te_i_count": te_i_count,
-    "te_i_percentage": te_i_percentage,
-    "te_i_time": te_i_time,
-    "te_i_times": te_i_times,
+    "te_i_name": te_i_name,
+    "te_i_pre_percentage": te_i_pre_percentage,
+    "te_i_pre_time": te_i_pre_time,
+    "te_i_post_percentage": te_i_post_percentage,
+    "te_i_post_time": te_i_post_time,
     
     "te_p_name": te_p_name,
-    "te_p_count": te_p_count,
-    "te_p_correctness": te_p_correctness,
-    "te_p_time": te_p_time,
-    "te_p_times": te_p_times,
-    "te_p_percentage": te_p_percentage,
-    "te_p_percentage100": te_p_percentage100,
-    "te_p_resumption": te_p_resumption, 
-    "te_p_resumptions": te_p_resumptions,
-    "te_p_interruptions": te_p_interruptions, 
-    "te_p_movestotal": te_p_movestotal 
+    "te_p_pre_correctness": te_p_pre_correctness,
+    "te_p_pre_time": te_p_pre_time,
+    "te_p_pre_resumption": te_p_pre_resumption,
+    "te_p_pre_movestotal": te_p_pre_movestotal,
+    "te_p_post_correctness": te_p_post_correctness,
+    "te_p_post_time": te_p_post_time,
+    "te_p_post_resumption": te_p_post_resumption,
+    "te_p_post_movestotal": te_p_post_movestotal 
     }
 
 dataframe = pd.DataFrame(columnTitles)
