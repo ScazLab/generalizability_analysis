@@ -257,29 +257,6 @@ class Participant():
         if (hypotheses == HYPOTHESIS_SWITCH_TASK):
             self.hypotheses = HYPOTHESIS_SWITCH_TASK
 
-def plotter(xAxis, lags, title, yLabel, PlotSpot, filenameForCharts):
-    traceuse.plot(range(1,len(xAxis) +1), lags)
-    traceuse.title(title)
-    traceuse.xlabel("24 Lag Times over Three Phases (Averages)")
-    # traceuse.xticks(fontsize=8, rotation=0)
-    traceuse.ylabel(yLabel)
-    # traceuse.yticks(fontsize=8, rotation=0)
-    traceuse.grid()
-    name = PlotSpot + filenameForCharts + ".pdf"
-    traceuse.savefig(name, bbox_inches='tight')
-    traceuse.show(block=False)
-    traceuse.pause(.5)
-    traceuse.close("all")
-    return
-
-def doSortingStackingAveraging(flattenedList):
-    stackedFlattenedAttentionList.append(flattenedList)
-    averageLags = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-                         allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    return averageLags
-
-
-
 
 def lineNumber():
     # Returns the current line number
@@ -763,6 +740,15 @@ stackedFlattenedAttentionList = []
 stackedFlattenedResumptionList = []
 flattenedAttentionList = []
 flattenedResumptionList = []
+collectAVGmoves = []
+collectAVGmovesHanoiAssessment = []
+collectAVGmovesHanoiTraining = []
+collectAVGmovesHanoiTesting = []
+
+collectAVGCompletionTimeHanoiAssessment = []
+collectAVGCompletionTimeHanoiTraining = []
+collectAVGCompletionTimeHanoiTesting = []
+
 
 for p in all_participants:
     print(p.p_id)
@@ -821,8 +807,6 @@ for p in all_participants:
 
     if p.assessment_interruption.name == "math":
         mathData=MathData()
-        
-        # determine total time and number of correct responses during this phase
         totalTime = mathData.totalTime
         correctResponseCount = 0
         numberOfTasksDuringInterruptions = 0
@@ -834,9 +818,7 @@ for p in all_participants:
                     if eachMove.reTasked == 1:
                         numberOfTasksDuringInterruptions += 1
                         durationB4AttentionList.append(float(eachMove.timeSpent))
-                        # durationB4AttentionList.append(float(allResponses.timeSpent))
                         allResponses.reTasked_during_Assessment = False
-        print("durationB4AttentionList Assessment Math: ", durationB4AttentionList)
         for correctResponses in p.assessment_interruption.interruption.math_tasks:
             if correctResponses.correct == True:
                 correctResponseCount += 1
@@ -877,10 +859,9 @@ for p in all_participants:
                         durationB4AttentionList.append(float(eachMove.timeSpent))
                         # durationB4AttentionList.append(float(allResponses.timeSpent))
                         allResponses.reTasked_during_Training = False
-        print("durationB4AttentionList Training Math: ", durationB4AttentionList)
-        # if p.group == 1 and len(durationB4AttentionList) < 8:
-        #     durationB4AttentionList += 8 * [.5]
-        #     del durationB4AttentionList[0]
+        if p.group == 1 and len(durationB4AttentionList) < 8:
+            durationB4AttentionList += 8 * [.5]
+            del durationB4AttentionList[0]
 
         for correctResponses in p.training_interruption.interruption.math_tasks:
             if correctResponses.correct == True:
@@ -922,7 +903,6 @@ for p in all_participants:
                         durationB4AttentionList.append(float(eachMove.timeSpent))
                         # durationB4AttentionList.append(float(allResponses.timeSpent))
                         allResponses.reTasked_during_Testing = False
-        print("durationB4AttentionList Testing Math: ", durationB4AttentionList)
         for correctResponses in p.testing_interruption.interruption.math_tasks:
             # durationB4AttentionList.append(float(correctResponses.timeSpent))
             # print("durationB4AttentionList: ", durationB4AttentionList)
@@ -964,7 +944,6 @@ for p in all_participants:
                         numberOfTasksDuringInterruptions += 1
                         durationB4AttentionList.append(float(eachMove.timeSpent))
                         allResponses.reTasked_during_Training = False
-        print("durationB4AttentionList *****Stroop Assessment*****: ", durationB4AttentionList)
 
         for correctResponses in p.assessment_interruption.interruption.stroop_tasks:
             if correctResponses.correct == True:
@@ -1002,11 +981,10 @@ for p in all_participants:
                         numberOfTasksDuringInterruptions += 1
                         durationB4AttentionList.append(float(eachMove.timeSpent))
                         allResponses.reTasked_during_Training = False
-        print("durationB4AttentionList *****Stroop Training*****: ", durationB4AttentionList)
 
-        # if p.group == 1 and len(durationB4AttentionList) < 8:
-        #     durationB4AttentionList += 8 * [.5]
-        #     del durationB4AttentionList[0]
+        if p.group == 1 and len(durationB4AttentionList) < 8:
+            durationB4AttentionList += 8 * [.5]
+            del durationB4AttentionList[0]
 
         for correctResponses in p.training_interruption.interruption.stroop_tasks:
             if correctResponses.correct == True:
@@ -1044,7 +1022,6 @@ for p in all_participants:
                         numberOfTasksDuringInterruptions += 1
                         durationB4AttentionList.append(float(eachMove.timeSpent))
                         allResponses.reTasked_during_Training = False
-        print("durationB4AttentionList *****Stroop Testing*****: ", durationB4AttentionList)
 
         for correctResponses in p.testing_interruption.interruption.stroop_tasks:
             if correctResponses.correct == True:
@@ -1114,9 +1091,6 @@ for p in all_participants:
             totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
                 p.assessment_task.task.draw_tasks[iterant].draw_response_list)
             iterant += 1
-        print("**durationB4resumptionList**DRAW-Assessment: ", durationB4resumptionList)
-
-
         averageTimeRespondAfterInterruptionListAssessment.append(p.average_time_to_answer_after_interruption)
 
         # record data
@@ -1179,9 +1153,8 @@ for p in all_participants:
             totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
                 p.training_task.task.draw_tasks[iterant].draw_response_list)
             iterant += 1
-        print("**durationB4resumptionList**DRAW**Training: ", durationB4resumptionList)
-        # if p.group == 1 and len(durationB4resumptionList) < 8:
-        #     durationB4resumptionList += 8 * [.5]
+        if p.group == 1 and len(durationB4resumptionList) < 8:
+            durationB4resumptionList += 8 * [.5]
 
         if p.group == 0:
             averageTimeRespondAfterInterruptionListTraining.append(p.average_time_to_answer_after_interruption)
@@ -1250,7 +1223,6 @@ for p in all_participants:
             totalNumberOfMovesBeforeCompleteForAllDrawTasksPerPhasePerParticipant += len(
                 p.testing_task.task.draw_tasks[iterant].draw_response_list)
             iterant += 1
-        print("**durationB4resumptionList**DRAW**Testing: ", durationB4resumptionList)
 
         averageTimeRespondAfterInterruptionListTesting.append(p.average_time_to_answer_after_interruption)
 
@@ -1292,6 +1264,7 @@ for p in all_participants:
         totalTime = 0
         durationB4resumptionList = []
         numberOfInterruptionsDuringTask = 0
+        numberOfHanoiCompletionsInPhase = []
         for eachHanoiTask in p.assessment_task.task.hanoi_tasks:
             if eachHanoiTask.interrupted_during_Assessment == True:
                 for eachMove in eachHanoiTask.hanoi_move_list:
@@ -1302,14 +1275,19 @@ for p in all_participants:
                         eachHanoiTask.interrupted_during_Assessment = False
             p.moves_to_complete = len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list)
-            iterant+=1
-        print("**durationB4resumptionList**HANOI**Assessment: ", durationB4resumptionList)
+            numberOfHanoiCompletionsInPhase.append(totalNumberOfMovesBeforeCompletePerTask)
 
-        p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
-        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += \
+                len(p.assessment_task.task.hanoi_tasks[iterant].hanoi_move_list)
+            iterant+=1
+        avgNumberOfMovesBeforeCompleteForAllHanoiTasksPerAssessmentPhasePerParticipant = \
+            p.average_moves_to_complete = \
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant / \
+            numberOfHanoiTasksPerPhasePerParticipant
+        averageTime4Completion4AllHanoiTasksPerAssessmentPhasePerParticipant = p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
         p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
         avgTimesToCompletionForAllHanoiTasksListAssessment.append(p.average_time_to_complete)
+
         averageTimeMoveAfterInterruptionListAssessment.append(p.average_time_move_after_interruption)
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
         # print("End of assessment_task Hanoi")
@@ -1337,6 +1315,7 @@ for p in all_participants:
         totalTime = 0
         durationB4resumptionList = []
         numberOfInterruptionsDuringTask = 0
+        numberOfHanoiCompletionsInPhase = []
         for eachHanoiTask in p.training_task.task.hanoi_tasks:
             if eachHanoiTask.interrupted_during_Training == True:
                 for eachMove in eachHanoiTask.hanoi_move_list:
@@ -1347,15 +1326,19 @@ for p in all_participants:
                         eachHanoiTask.interrupted_during_Training = False
             p.moves_to_complete = len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
+            numberOfHanoiCompletionsInPhase.append(totalNumberOfMovesBeforeCompletePerTask)
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += \
+                len(p.training_task.task.hanoi_tasks[iterant].hanoi_move_list)
             iterant+=1
-        print("**durationB4resumptionList**HANOI**Training: ", durationB4resumptionList)
-        # if p.group == 1 and len(durationB4resumptionList) < 8:
-        #     durationB4resumptionList += 8 * [.5]
+        if p.group == 1 and len(durationB4resumptionList) < 8:
+            durationB4resumptionList += 8 * [.5]
 
-
+        avgNumberOfMovesBeforeCompleteForAllHanoiTasksPerTrainingPhasePerParticipant = \
+            p.average_moves_to_complete = \
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant / \
+            numberOfHanoiTasksPerPhasePerParticipant
         p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
-        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
+        averageTime4Completion4AllHanoiTasksPerTrainingPhasePerParticipant = p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
         
         avgTimesToCompletionForAllHanoiTasksListTraining.append(p.average_time_to_complete) #p.average_time_to_complete.append(totalTime)
         averageNumberOfMovesBeforeCompleteForAllHanoiTasksListTrain.append(p.average_moves_to_complete)
@@ -1392,6 +1375,7 @@ for p in all_participants:
         totalTime = 0
         durationB4resumptionList = []
         numberOfInterruptionsDuringTask = 0
+        numberOfHanoiCompletionsInPhase = []
         for eachHanoiTask in p.testing_task.task.hanoi_tasks:
             if eachHanoiTask.interrupted_during_Testing == True:
                 for eachMove in eachHanoiTask.hanoi_move_list:
@@ -1403,9 +1387,10 @@ for p in all_participants:
 
             p.moves_to_complete = len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
             totalNumberOfMovesBeforeCompletePerTask = p.moves_to_complete
-            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
+            numberOfHanoiCompletionsInPhase.append(totalNumberOfMovesBeforeCompletePerTask)
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant += \
+                len(p.testing_task.task.hanoi_tasks[iterant].hanoi_move_list)
             iterant+=1
-        print("**durationB4resumptionList**HANOI**Testing: ", durationB4resumptionList)
 
         # #################################
         # #       NON-MODULAR CODE        #
@@ -1423,8 +1408,12 @@ for p in all_participants:
         if p.group == 1:
             del durationB4resumptionList[0]
 
+        avgNumberOfMovesBeforeCompleteForAllHanoiTasksPerTestingPhasePerParticipant = \
+            p.average_moves_to_complete = \
+            totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant / \
+            numberOfHanoiTasksPerPhasePerParticipant
         p.average_moves_to_complete = totalNumberOfMovesBeforeCompleteForAllHanoiTasksPerPhasePerParticipant/numberOfHanoiTasksPerPhasePerParticipant
-        p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
+        averageTime4Completion4AllHanoiTasksPerTestingPhasePerParticipant = p.average_time_to_complete = totalTime/numberOfHanoiTasksPerPhasePerParticipant
         p.average_time_move_after_interruption = sum(durationB4resumptionList)/len(durationB4resumptionList)
         avgTimesToCompletionForAllHanoiTasksListTesting.append(p.average_time_to_complete)
         averageTimeMoveAfterInterruptionListTesting.append(p.average_time_move_after_interruption)
@@ -1445,590 +1434,7 @@ for p in all_participants:
         durationB4ResumptionListPhasesPID.extend(durationB4resumptionList)
         testingResumptionLagsList = durationB4resumptionList
 
-    orderedDictListAttentions = \
-        {
-        'assessInterruptLags': assessInterruptLagsList,
-        'trainingInterruptLags': trainingInterruptLagsList,
-        'testingInterruptLags': testingInterruptLagsList
-        }
 
-    orderedDictListResumptions = \
-        {
-            'assessResumptionLagsList': assessResumptionLagsList,
-            'trainingResumptionLagsList': trainingResumptionLagsList,
-            'testingResumptionLagsList': testingResumptionLagsList
-        }
-
-    strippedDictAttention = list(orderedDictListAttentions.values())
-    strippedDictResumption = list(orderedDictListResumptions.values())
-    flattenedAttentionList = [item for sublist in strippedDictAttention for item in sublist]
-    flattenedResumptionList = [item for sublist in strippedDictResumption for item in sublist]
-
-    # for loop to stack the required lists by conditions, hypotheses, task/interruption toggling
-    # Experimental Group Demarcation -------------------------------------------------------------------
-    # if p.group == 0 and p.hypotheses == 1 and p.starting_task == 1 and p.starting_interruption == 1:
-    #     # Experimental group = 0, hypothesis 1 (Task-Toggling) = p.hypotheses = 1
-    #     print("ExpH1DrawHanoiDrawStroop")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH1DrawHanoiDrawStroop_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H1: Draw-Hanoi-Draw Stroop'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH1DrawHanoiDrawStroop_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H1: Draw-Hanoi-Draw Stroop'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 0 and p.hypotheses == 1 and p.starting_task == 1 and p.starting_interruption == 2:
-    #     print("ExpH1DrawHanoiDrawMath")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH1DrawHanoiDrawMath_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H1: Draw-Hanoi-Draw Math'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH1DrawHanoiDrawMath_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H1: Draw-Hanoi-Draw Math'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 0 and p.hypotheses == 1 and p.starting_task == 2 and p.starting_interruption == 1:
-    #     print("ExpH1HanoiDrawHanoiStroop")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH1HanoiDrawHanoiStroop_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H1: Hanoi-Draw-Hanoi Stroop'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH1HanoiDrawHanoiStroop_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H1: Hanoi-Draw-Hanoi Stroop'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-
-    # if p.group == 0 and p.hypotheses == 1 and p.starting_task == 2 and p.starting_interruption == 2:
-    #     print("ExpH1HanoiDrawHanoiMath")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH1HanoiDrawHanoiMath_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H1: Hanoi-Draw-Hanoi Math'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH1HanoiDrawHanoiMath_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H1: Hanoi-Draw-Hanoi Math'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 0 and p.hypotheses == 2 and p.starting_task == 1 and p.starting_interruption == 1:
-    #     print("ExpH2StroopMathStroopDraw")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH2StroopMathStroopDraw_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H2: Stroop-Math-Stroop Draw'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH2StroopMathStroopDraw_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H2: Stroop-Math-Stroop Draw'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 0 and p.hypotheses == 2 and p.starting_task == 2 and p.starting_interruption == 1:
-    #     print("ExpH2StroopMathStroopHanoi")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH2StroopMathStroopHanoi_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H2: Stroop-Math-Stroop Hanoi'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH2StroopMathStroopHanoi_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H2: Stroop-Math-Stroop Hanoi'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 0 and p.hypotheses == 2 and p.starting_task == 1 and p.starting_interruption == 2:
-    #     print("ExpH2MathStroopMathDraw")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH2MathStroopMathDraw_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H2: Math-Stroop-Math Draw'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH2MathStroopMathDraw_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H2: Math-Stroop-Math Draw'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 0 and p.hypotheses == 2 and p.starting_task == 2 and p.starting_interruption == 2:
-    #     print("ExpH2MathStroopMathHanoi")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ExpH2MathStroopMathHanoi_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H2: Math-Stroop-Math Hanoi'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ExpH2MathStroopMathHanoi_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Experimental Group: H2: Math-Stroop-Math Hanoi'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # # Control Group Demarcation ------------------------------------------------------------------------
-    #
-    # if p.group == 1 and p.hypotheses == 1 and p.starting_task == 1 and p.starting_interruption == 1:
-    #     # Control group = 1, hypothesis 1 (Task-Toggling) = p.hypotheses = 1
-    #     print("ControlH1DrawHanoiDrawStroop")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH1DrawHanoiDrawStroop_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Experimental Group: H1: Draw-Hanoi-Draw Stroop'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH1DrawHanoiDrawStroop_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H1: Draw-Hanoi-Draw Stroop'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 1 and p.starting_task == 1 and p.starting_interruption == 2:
-    #     print("ControlH1DrawHanoiDrawMath")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH1DrawHanoiDrawMath_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H1: Draw-Hanoi-Draw Math'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH1DrawHanoiDrawMath_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H1: Draw-Hanoi-Draw Math'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 1 and p.starting_task == 2 and p.starting_interruption == 1:
-    #     print("ControlH1HanoiDrawHanoiStroop")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH1HanoiDrawHanoiStroop_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H1: Hanoi-Draw-Hanoi Stroop'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH1HanoiDrawHanoiStroop_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H1: Hanoi-Draw-Hanoi Stroop'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 1 and p.starting_task == 2 and p.starting_interruption == 2:
-    #     print("ControlH1HanoiDrawHanoiMath")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH1HanoiDrawHanoiMath_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H1: Hanoi-Draw-Hanoi Math'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH1HanoiDrawHanoiMath_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H1: Hanoi-Draw-Hanoi Math'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 2 and p.starting_task == 1 and p.starting_interruption == 1:
-    #     print("ControlH2StroopMathStroopDraw")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH2StroopMathStroopDraw_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H2: Stroop-Math-Stroop Draw'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH2StroopMathStroopDraw_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H2: Stroop-Math-Stroop Draw'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 2 and p.starting_task == 2 and p.starting_interruption == 1:
-    #     print("ControlH2StroopMathStroopHanoi")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH2StroopMathStroopHanoi_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H2: Stroop-Math-Stroop Hanoi'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH2StroopMathStroopHanoi_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H2: Stroop-Math-Stroop Hanoi'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 2 and p.starting_task == 1 and p.starting_interruption == 2:
-    #     print("ControlH2MathStroopMathDraw")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH2MathStroopMathDraw_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H2: Math-Stroop-Math Draw'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH2MathStroopMathDraw_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H2: Math-Stroop-Math Draw'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    # if p.group == 1 and p.hypotheses == 2 and p.starting_task == 2 and p.starting_interruption == 2:
-    #     print("ControlH2MathStroopMathHanoi")
-    #     # averageAttentions = doSortingStackingAveraging(flattenedAttentionList)
-    #
-    #     stackedFlattenedAttentionList.append(flattenedAttentionList)
-    #     averageAttentions = [sum(allParticipantsAttentions) / len(stackedFlattenedAttentionList) for
-    #                          allParticipantsAttentions in zip(*stackedFlattenedAttentionList)]
-    #
-    #     filenameForCharts = "ControlH2MathStroopMathHanoi_AVG_InterruptionLags"
-    #     averageAttentionsDF = pd.DataFrame(averageAttentions)
-    #     averageAttentionsDF.to_csv('../DataResults/InterruptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/InterruptionLags/'
-    #     title = 'Control Group: H2: Math-Stroop-Math Hanoi'
-    #     yLabel = 'Average Interruption Lag Times (Seconds)'
-    #     plotter(averageAttentions, averageAttentions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
-    #
-    #     # -----------------------Demarcation for code for avg resumption lag for participants across all phases
-    #     # averageResumptions = doSortingStackingAveraging(flattenedResumptionList)
-    #
-    #     stackedFlattenedResumptionList.append(flattenedResumptionList)
-    #     averageResumptions = [sum(allParticipantsResumptions) / len(stackedFlattenedResumptionList) for
-    #                           allParticipantsResumptions in zip(*stackedFlattenedResumptionList)]
-    #
-    #     filenameForCharts = "ControlH2MathStroopMathHanoi_AVG_ResumptionLags"
-    #     averageResumptionsDF = pd.DataFrame(averageResumptions)
-    #     averageResumptionsDF.to_csv('../DataResults/ResumptionLags/' + filenameForCharts + '.csv')
-    #
-    #     PlotSpot = '../DataResults/ResumptionLags/'
-    #     title = 'Control Group: H2: Math-Stroop-Math Hanoi'
-    #     yLabel = 'Average Resumption Lag Times (Seconds)'
-    #     plotter(averageResumptions, averageResumptions,
-    #             title, yLabel, PlotSpot, filenameForCharts)
 
 columnTitles = {
     "PID": id_arr, 
