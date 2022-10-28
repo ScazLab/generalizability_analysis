@@ -52,7 +52,7 @@ tr_p_percentage            	# percentage of average correctness across tasks (dr
 tr_p_percentage100         	# percentages of 100% correct responses to tasks (draw only)
 tr_p_resumption            	# time to resume after interruption (hanoi only ??)
 tr_p_resumptions           	# times to resume after interruptions (hanoi only ??)
-tr_p_interruptions         	# total number of consective batch of interruptions during task (hanoi only)
+tr_p_interruptions         	# total number of consecutive batch of interruptions during task (hanoi only)
 tr_p_movestotal            	# total number of moves to complete all tasks (hanoi only)
 tr_p_movetasktime          	# average time after a move (hanoi only)
 tr_p_moveinterruptedtime   	# average time to move after interruption (hanoi only ??)
